@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Web.Http.Cors;
 using System.Web.Http;
 
 namespace ST
@@ -10,7 +8,7 @@ namespace ST
         public static void Register(HttpConfiguration config)
         {
             // Configuración y servicios de API web
-
+            config.EnableCors(new EnableCorsAttribute("http://localhost:4200", "*", "*"));
             // Rutas de API web
             config.MapHttpAttributeRoutes();
 
