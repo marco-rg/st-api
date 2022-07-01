@@ -69,6 +69,12 @@ namespace ST.Models
         public virtual DbSet<Profiles> Profiles { get; set; }
 
         public virtual DbSet<Pregunta> Pregunta { get; set; }
+
+        public virtual DbSet<Categorias> Categorias { get; set; }
+        public virtual DbSet<LocalesNacionales> LocalesNacionales { get; set; }
+
+        public virtual DbSet<Encuestas> Encuestas { get; set; }
+        public virtual DbSet<EncuestasDetalle> EncuestasDetalle { get; set; }
         /*public virtual DbSet<Visit> Visit { get; set; }
 
         public virtual DbSet<ReferenceMethodsDetail> ReferenceMethodsDetail { get; set; }
@@ -1427,6 +1433,40 @@ namespace ST.Models
                 .WithOptional(e => e.SystemParameter1)
                 .HasForeignKey(e => e.usrPosition);
 
+            modelBuilder.Entity<LocalesNacionales>().HasKey(p => p.CodigoLocal);
+
+            modelBuilder.Entity<Pregunta>().HasKey(p => p.PreguntaId);
+            modelBuilder.Entity<Pregunta>()
+                .Property(c => c.PreguntaId)
+                .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Identity);
+
+            modelBuilder.Entity<Pregunta>()
+                .Property(e => e.Descripcion)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Pregunta>()
+                .Property(e => e.UserCreatorId)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Pregunta>()
+                .Property(e => e.UserModifierId)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Categorias>().HasKey(p => p.CategoriaId);
+            modelBuilder.Entity<Categorias>()
+                .Property(c => c.CategoriaId)
+                .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Identity);
+
+            modelBuilder.Entity<Categorias>()
+                .Property(e => e.Descripcion)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Categorias>()
+                    .HasMany(e => e.Pregunta)
+                    .WithOptional(e => e.Categorias)
+                    .HasForeignKey(e => e.CategoriaId);
+            /*modelBuilder.Entity<Pregunta>()
+            .Property(p => p.CategoriaId).IsOptional();*/
             /*modelBuilder.Entity<UserSystem>()
             .HasMany(e => e.SamplingDetail)
             .WithOptional(e => e.UserSystem)

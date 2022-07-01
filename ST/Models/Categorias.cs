@@ -5,9 +5,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace ST.Models
 {
     [Table("Categorias")]
-    public class Categoria
+    public partial class Categorias
     {
-        public Categoria()
+        public Categorias()
         {
             Pregunta = new HashSet<Pregunta>();
         }

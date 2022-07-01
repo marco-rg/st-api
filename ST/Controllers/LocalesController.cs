@@ -5,12 +5,11 @@ using System.Web.Http.Cors;
 
 namespace ST.Controllers
 {
-    //[Authorize]
     [EnableCors(origins: "http://localhost:4200", headers: "*", methods: "*")]
-    [RoutePrefix("api/Pregunta")]
-    public class PreguntaController : ApiController
+    [RoutePrefix("api/Locales")]
+    public class LocalesController : ApiController
     {
-        public Models.Pregunta objPregunta = null;
+        public Models.LocalesNacionales objLocalesNacionales = null;
         // public Models.ModelHealthAdvisor dbContext = new Models.ModelHealthAdvisor();
 
         /// <summary>
@@ -21,24 +20,26 @@ namespace ST.Controllers
         [Route("All")]
         public Models.Results GetAll()
         {
-
             Models.Results resultado = new Models.Results();
-
-            using (var dbContextPregunta = new Models.ModelHealthAdvisor())
+            //if (TokenGenerator.HasPermissions(Request, "HA_SAMPLE_LOCATION_INSTANCE", "Read"))
+            //{
+            using (var dbContextLocalesNacionales = new Models.ModelHealthAdvisor())
             {
-
-                resultado.OBJETO = dbContextPregunta.Pregunta.Include("Categorias").Where(t => t.CategoriaId > 0).ToList();//
-                resultado.MENSAJE = "Successful Sample Type List ";
+                var consulta = dbContextLocalesNacionales.LocalesNacionales;
+                resultado.OBJETO = consulta.ToList();
+                resultado.MENSAJE = "Successful Locales Nacionales";
                 resultado.STATUS = "success";
                 return resultado;
             }
-
-
-
-
+            //}
+            //else
+            //{
+            //    resultado.OBJETO = null;
+            //    resultado.MENSAJE = "No authorized";
+            //    resultado.STATUS = "unsuccess";
+            //    return resultado;
+            //}
         }
-
-
 
         /// <summary>
         /// Get Smaple Type by Id
@@ -49,66 +50,99 @@ namespace ST.Controllers
         [Route("Get/{id:int}")]
         public Models.Results Get(int id)
         {
-
             Models.Results resultado = new Models.Results();
 
-            using (var dbContextPregunta = new Models.ModelHealthAdvisor())
+            using (var dbContextLocalesNacionales = new Models.ModelHealthAdvisor())
             {
-                Models.Pregunta objPregunta = null;
+                Models.LocalesNacionales objLocalesNacionales = null;
 
 
-                objPregunta = dbContextPregunta.Pregunta.FirstOrDefault((p) => p.PreguntaId == id);
-                if (objPregunta != null)
+                objLocalesNacionales = dbContextLocalesNacionales.LocalesNacionales.FirstOrDefault((p) => p.CodigoLocal == id);
+                if (objLocalesNacionales != null)
                 {
-                    resultado.OBJETO = objPregunta;
-                    resultado.MENSAJE = "Successful Sample Type";
+                    resultado.OBJETO = objLocalesNacionales;
+                    resultado.MENSAJE = "Successful Locales Nacionales";
                     resultado.STATUS = "success";
                     return resultado;
                 }
                 else
                 {
 
-                    resultado.MENSAJE = "Sample Type Id does not exist";
+                    resultado.MENSAJE = "Sample Location Type Id does not exist";
                     resultado.STATUS = "error";
                     return resultado;
                 }
             }
 
+        }
 
 
+        /// <summary>
+        /// Get Smaple Type by Id
+        /// </summary>
+        /// <param name="id">Sample Type Id</param>
+        /// <param name="slinId"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("GetSampleLocationSite/{id:int}/{slinId:int}")]
+        public Models.Results GetSampleLocationSite(String id, int slinId)
+        {
+
+            Models.Results resultado = new Models.Results();
+
+            using (var dbContextLocalesNacionales = new Models.ModelHealthAdvisor())
+            {
+                Models.LocalesNacionales LocalesNacionalesSite = null;
 
 
+                LocalesNacionalesSite = dbContextLocalesNacionales.LocalesNacionales.FirstOrDefault((p) => p.FormatoLocal == id && p.CodigoLocal == slinId);
+                if (LocalesNacionalesSite != null)
+                {
+                    resultado.OBJETO = LocalesNacionalesSite;
+                    resultado.MENSAJE = "Successful Sample Location Type";
+                    resultado.STATUS = "success";
+                    return resultado;
+                }
+                else
+                {
+
+                    resultado.MENSAJE = "Sample Location Type Id does not exist";
+                    resultado.STATUS = "error";
+                    return resultado;
+                }
+            }
 
         }
 
         /// <summary>
         /// Create Sample type
         /// </summary>
-        /// <param name="_objPregunta">Data</param>
+        /// <param name="_objLocalesNacionales">Data</param>
         /// <returns></returns>
         [HttpPost]
         [Route("Create")]
         // POST api/<controller>
-        public Models.Results Post([FromBody]Models.Pregunta _objPregunta)
+        public Models.Results Post([FromBody]Models.LocalesNacionales _objLocalesNacionales)
         {
 
             Models.Results resultado = new Models.Results();
+            //if (TokenGenerator.HasPermissions(Request, "HA_SAMPLE_LOCATION_INSTANCE", "Create"))
+            //{
 
-
-            using (var dbContextPregunta = new Models.ModelHealthAdvisor())
+            using (var dbContextLocalesNacionales = new Models.ModelHealthAdvisor())
             {
 
                 try
                 {
                     if (ModelState.IsValid)
                     {
-                        _objPregunta.CreadoAl = System.DateTime.Now;
-                        _objPregunta.UserCreatorId = TokenGenerator.GetUserSystem(Request);
-                        objPregunta = _objPregunta;
-                        dbContextPregunta.Pregunta.Add(_objPregunta);
-                        dbContextPregunta.SaveChanges();
-                        resultado.OBJETO = objPregunta;
-                        resultado.MENSAJE = "Question created";
+                        //_objLocalesNacionales.slinCreationTime = System.DateTime.Now;
+                        //_objLocalesNacionales.slinCreatorUserId = TokenGenerator.GetUserSystem(Request);
+                        objLocalesNacionales = _objLocalesNacionales;
+                        dbContextLocalesNacionales.LocalesNacionales.Add(_objLocalesNacionales);
+                        dbContextLocalesNacionales.SaveChanges();
+                        resultado.OBJETO = objLocalesNacionales;
+                        resultado.MENSAJE = "Sample Location Type created";
                         resultado.STATUS = "success";
                         return resultado;
                     }
@@ -120,12 +154,7 @@ namespace ST.Controllers
                         {
                             foreach (var error in state.Value.Errors)
                             {
-                                if (!String.IsNullOrEmpty(error.ErrorMessage.Trim()))
-                                    mensajeDeErrores = mensajeDeErrores + error.ErrorMessage + "." + System.Environment.NewLine;
-                                else if (!String.IsNullOrEmpty(error.Exception.Message.Trim()))
-                                    mensajeDeErrores = mensajeDeErrores + error.Exception.Message + "." + System.Environment.NewLine;
-                                else
-                                    mensajeDeErrores = "Uncontrolled error";
+                                mensajeDeErrores = mensajeDeErrores + error.ErrorMessage + "." + System.Environment.NewLine;
                             }
                         }
 
@@ -145,12 +174,12 @@ namespace ST.Controllers
                         switch (sqlex.Number)
                         {
                             case 547:
-                                resultado.MENSAJE = "Sample Type cant be deleted.";
+                                resultado.MENSAJE = "Sample Location Type cant be deleted.";
                                 break; //FK exception
                             case 2601:
 
                                 string value = sqlex.Message.Split('(', ')')[1];
-                                resultado.MENSAJE = @"An Sample Type with the same CODE or NAME value already exists. Value is " + value;//primary key exception
+                                resultado.MENSAJE = @"An Sample Location Type with the same CODE or NAME value already exists. Value is " + value;//primary key exception
                                 break;
 
                             case 2627:
@@ -162,6 +191,15 @@ namespace ST.Controllers
                     return resultado;
                 }
             }
+            //}
+            //else
+            //{
+            //    resultado.OBJETO = null;
+            //    resultado.MENSAJE = "No authorized";
+            //    resultado.STATUS = "unsuccess";
+            //    return resultado;
+            //}
+
 
 
 
@@ -175,36 +213,36 @@ namespace ST.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("Update")]
-        public Models.Results PostUpdate([FromBody]Models.Pregunta _objMuestra)
+        public Models.Results PostUpdate([FromBody]Models.LocalesNacionales _objMuestra)
         {
 
             Models.Results resultado = new Models.Results();
 
-            using (var dbContextPregunta = new Models.ModelHealthAdvisor())
+            using (var dbContextLocalesNacionales = new Models.ModelHealthAdvisor())
             {
-
 
                 try
                 {
                     if (ModelState.IsValid)
                     {
                         //fetching and filter specific member id record   
-                        objPregunta = (from a in dbContextPregunta.Pregunta where a.PreguntaId == _objMuestra.PreguntaId select a).FirstOrDefault();
+                        objLocalesNacionales = (from a in dbContextLocalesNacionales.LocalesNacionales where a.CodigoLocal == _objMuestra.CodigoLocal select a).FirstOrDefault();
 
                         //checking fetched or not with the help of NULL or NOT.  
-                        if (objPregunta != null)
+                        if (objLocalesNacionales != null)
                         {
                             //set received _member object properties with memberdetail  
-                            objPregunta.ModificadoAl = System.DateTime.Now;
-                            objPregunta.UserModifierId = TokenGenerator.GetUserSystem(Request);
-                            objPregunta.CategoriaId = _objMuestra.CategoriaId;                            
-                            objPregunta.Peso = _objMuestra.Peso;
-                            objPregunta.Descripcion = _objMuestra.Descripcion;
-                            objPregunta.CategoriaId = _objMuestra.CategoriaId;
+                            objLocalesNacionales.Zona = _objMuestra.Zona;
+                            objLocalesNacionales.Ciudad = _objMuestra.Ciudad;
+                            objLocalesNacionales.NombreLocal = _objMuestra.NombreLocal;
+                            objLocalesNacionales.Provincia = _objMuestra.Provincia;
+                            objLocalesNacionales.Latitud = _objMuestra.Latitud;
+                            objLocalesNacionales.Longitud = _objMuestra.Longitud;
+                            objLocalesNacionales.FormatoLocal = _objMuestra.FormatoLocal;
                             //save set allocation.  
-                            dbContextPregunta.SaveChanges();
-                            resultado.OBJETO = objPregunta;
-                            resultado.MENSAJE = "Pregunta Tupe updated";
+                            dbContextLocalesNacionales.SaveChanges();
+                            resultado.OBJETO = objLocalesNacionales;
+                            resultado.MENSAJE = "Sample Location Type Updated";
                             resultado.STATUS = "success";
                             return resultado;
 
@@ -212,7 +250,7 @@ namespace ST.Controllers
                         else
                         {
 
-                            resultado.MENSAJE = "Pregunta Id does not exist.";
+                            resultado.MENSAJE = "ample Location Type Id does not exist";
                             resultado.STATUS = "error";
                             return resultado;
                         }
@@ -226,12 +264,7 @@ namespace ST.Controllers
                         {
                             foreach (var error in state.Value.Errors)
                             {
-                                if (!String.IsNullOrEmpty(error.ErrorMessage.Trim()))
-                                    mensajeDeErrores = mensajeDeErrores + error.ErrorMessage + "." + System.Environment.NewLine;
-                                else if (!String.IsNullOrEmpty(error.Exception.Message.Trim()))
-                                    mensajeDeErrores = mensajeDeErrores + error.Exception.Message + "." + System.Environment.NewLine;
-                                else
-                                    mensajeDeErrores = "Uncontrolled error";
+                                mensajeDeErrores = mensajeDeErrores + error.ErrorMessage + "." + System.Environment.NewLine;
                             }
                         }
 
@@ -251,7 +284,6 @@ namespace ST.Controllers
             }
 
 
-
         }
 
         /// <summary>
@@ -261,32 +293,32 @@ namespace ST.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("PhysicalDelete")]
-        public Models.Results PostDelete([FromBody]Models.Pregunta _objMuestra)
+        public Models.Results PostDelete([FromBody]Models.LocalesNacionales _objMuestra)
         {
             Models.Results resultado = new Models.Results();
 
-            using (var dbContextPregunta = new Models.ModelHealthAdvisor())
+            using (var dbContextLocalesNacionales = new Models.ModelHealthAdvisor())
             {
 
                 try
                 {
 
                     //fetching and filter specific member id record   
-                    objPregunta = (from a in dbContextPregunta.Pregunta where a.PreguntaId == _objMuestra.PreguntaId select a).FirstOrDefault();
+                    objLocalesNacionales = (from a in dbContextLocalesNacionales.LocalesNacionales where a.CodigoLocal == _objMuestra.CodigoLocal select a).FirstOrDefault();
                     //checking fetched or not with the help of NULL or NOT.  
-                    if (objPregunta != null)
+                    if (objLocalesNacionales != null)
                     {
-                        dbContextPregunta.Pregunta.Remove(objPregunta);
-                        dbContextPregunta.SaveChanges();
-                        resultado.OBJETO = (from a in dbContextPregunta.Pregunta where a.PreguntaId == _objMuestra.PreguntaId select a).FirstOrDefault();
-                        resultado.MENSAJE = "Sample Type deleted";
+                        dbContextLocalesNacionales.LocalesNacionales.Remove(objLocalesNacionales);
+                        dbContextLocalesNacionales.SaveChanges();
+                        resultado.OBJETO = (from a in dbContextLocalesNacionales.LocalesNacionales where a.CodigoLocal == _objMuestra.CodigoLocal select a).FirstOrDefault();
+                        resultado.MENSAJE = "Sample Location Type deleted";
                         resultado.STATUS = "success";
                         return resultado;
                     }
                     else
                     {
 
-                        resultado.MENSAJE = "Sample Type Id does not exist.";
+                        resultado.MENSAJE = "Sample Location Id does not exist";
                         resultado.STATUS = "error";
                         return resultado;
                     }
@@ -303,12 +335,11 @@ namespace ST.Controllers
                         switch (sqlex.Number)
                         {
                             case 547:
-                                resultado.MENSAJE = "Sample Type cant be deleted.";
+                                resultado.MENSAJE = "Sample Location Type cant be deleted.";
                                 break; //FK exception
                             case 2601:
-
                                 string value = sqlex.Message.Split('(', ')')[1];
-                                resultado.MENSAJE = @"An Sample Tupe with the same CODE or NAME value already exists. Value is " + value;//primary key exception
+                                resultado.MENSAJE = @"An Sample Location Type with the same CODE or NAME value already exists. Value is " + value;//primary key exception
                                 break;
 
                             case 2627:
@@ -320,6 +351,7 @@ namespace ST.Controllers
                     return resultado;
                 }
             }
+
 
 
         }
@@ -331,11 +363,10 @@ namespace ST.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("LogicalDelete")]
-        public Models.Results PostDeleteLogical([FromBody]Models.Pregunta _objMuestra)
+        public Models.Results PostDeleteLogical([FromBody]Models.LocalesNacionales _objMuestra)
         {
             Models.Results resultado = new Models.Results();
-
-            using (var dbContextPregunta = new Models.ModelHealthAdvisor())
+            using (var dbContextLocalesNacionales = new Models.ModelHealthAdvisor())
             {
 
                 try
@@ -343,34 +374,38 @@ namespace ST.Controllers
 
 
                     //fetching and filter specific member id record   
-                    objPregunta = (from a in dbContextPregunta.Pregunta where a.PreguntaId == _objMuestra.PreguntaId select a).FirstOrDefault();
+                    objLocalesNacionales = (from a in dbContextLocalesNacionales.LocalesNacionales where a.CodigoLocal  == _objMuestra.CodigoLocal select a).FirstOrDefault();
                     //checking fetched or not with the help of NULL or NOT.  
-                    if (objPregunta != null)
+                    if (objLocalesNacionales != null)
                     {
 
-                        objPregunta.ModificadoAl = DateTime.Now;
-                        objPregunta.UserModifierId = TokenGenerator.GetUserSystem(Request);
-                        objPregunta.EstaEliminado = true;
+                        /*objLocalesNacionales.slinDeletionTime = DateTime.Now;
+                        objLocalesNacionales.slinDeleterUserId = TokenGenerator.GetUserSystem(Request);
+                        objLocalesNacionales.slinIsDeleted = true;*/
 
                         // dbContextAnalysis.Entry(objTipoAnalisis).CurrentValues.SetValues(objTipoAnalisis);
-                        dbContextPregunta.Pregunta.Attach(objPregunta);
-                        dbContextPregunta.Entry(objPregunta).Property(x => x.ModificadoAl).IsModified = true;
-                        dbContextPregunta.Entry(objPregunta).Property(x => x.UserModifierId).IsModified = true;
-                        dbContextPregunta.Entry(objPregunta).Property(x => x.EstaEliminado).IsModified = true;
-                        dbContextPregunta.SaveChanges();
+                        dbContextLocalesNacionales.LocalesNacionales.Attach(objLocalesNacionales);
+                        /*dbContextLocalesNacionales.Entry(objLocalesNacionales).Property(x => x.slinIsDeleted).IsModified = true;
+                        dbContextLocalesNacionales.Entry(objLocalesNacionales).Property(x => x.slinDeletionTime).IsModified = true;
+                        dbContextLocalesNacionales.Entry(objLocalesNacionales).Property(x => x.slinDeleterUserId).IsModified = true;*/
+                        dbContextLocalesNacionales.SaveChanges();
 
-                        resultado.OBJETO = objPregunta;
-                        resultado.MENSAJE = "Pregunta deleted";
+                        resultado.OBJETO = objLocalesNacionales;
+                        resultado.MENSAJE = "Sample Location Type deleted";
                         resultado.STATUS = "success";
                         return resultado;
                     }
                     else
                     {
 
-                        resultado.MENSAJE = "Pregunta Id does not exist.";
+                        resultado.MENSAJE = "Sample Location Id does not exist";
                         resultado.STATUS = "error";
                         return resultado;
                     }
+
+
+
+
                 }
                 catch (System.Data.Entity.Infrastructure.DbUpdateException ex)
                 {
@@ -382,12 +417,11 @@ namespace ST.Controllers
                         switch (sqlex.Number)
                         {
                             case 547:
-                                resultado.MENSAJE = "Sample Type cant be deleted.";
+                                resultado.MENSAJE = "Sample Location Type cant be deleted.";
                                 break; //FK exception
                             case 2601:
-
                                 string value = sqlex.Message.Split('(', ')')[1];
-                                resultado.MENSAJE = @"An Sample Tupe with the same CODE or NAME value already exists. Value is " + value;//primary key exception
+                                resultado.MENSAJE = @"An Sample Location Type with the same CODE or NAME value already exists. Value is " + value;//primary key exception
                                 break;
 
                             case 2627:
@@ -399,9 +433,6 @@ namespace ST.Controllers
                     return resultado;
                 }
             }
-
-
         }
-
     }
 }

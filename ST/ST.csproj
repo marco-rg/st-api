@@ -182,7 +182,9 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\SampleDirection.cs" />
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
+    <Compile Include="Controllers\CategoriasController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\LocalesController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
     <Compile Include="Controllers\PreguntaController.cs" />
     <Compile Include="Controllers\TokenGenerator.cs" />
@@ -191,8 +193,12 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\AquasymLogin.cs" />
-    <Compile Include="Models\Categoria.cs" />
+    <Compile Include="Models\Categorias.cs" />
+    <Compile Include="Models\Encuestas.cs" />
+    <Compile Include="Models\EncuestasController.cs" />
+    <Compile Include="Models\EncuestasDetalle.cs" />
     <Compile Include="Models\HealthAdvisorLogin.cs" />
+    <Compile Include="Models\LocalesNacionales.cs" />
     <Compile Include="Models\LoginRequest.cs" />
     <Compile Include="Models\ModelHealthAdvisor.cs" />
     <Compile Include="Models\Pregunta.cs" />
