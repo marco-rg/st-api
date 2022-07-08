@@ -64,8 +64,8 @@ namespace ST.Models
         public Models.Results PostAll([FromBody]Models.IF_PDI_LIST _objIfPDI)
         {
             Models.Results resultado = new Models.Results();
-            if (TokenGenerator.HasPermissions(Request, "HA_PATHOLOGICAL_ANALYSIS", "Create"))
-            {
+            /*if (TokenGenerator.HasPermissions(Request, "HA_PATHOLOGICAL_ANALYSIS", "Create"))
+            {*/
 
                 using (var dbContextPathological = new Models.ModelHealthAdvisor())
                 {
@@ -78,11 +78,11 @@ namespace ST.Models
 
 
                     var username = TokenGenerator.GetUserSystem(Request);
-                    var usuario = dbContextPathological.UserSystem.Where(t => t.usrLogon.Equals(username)).FirstOrDefault();
+                    var usuario = dbContextPathological.UserExternal.Where(t => t.Username.Equals(username)).FirstOrDefault();
                     if (usuario != null)
                     {
-                        string[] listCompanys = usuario.usrCompanyList.Split('|');
-                        var listCompanyIds = listCompanys.Select(x => long.Parse(x)).ToList();
+                        /*string[] listCompanys = usuario.usrCompanyList.Split('|');
+                        var listCompanyIds = listCompanys.Select(x => long.Parse(x)).ToList();*/
 
                         //resultado.OBJETO = dbContextPathological.Encuestas
                         //                    .Include(b => b.EncuestasDetalle.)
@@ -97,19 +97,20 @@ namespace ST.Models
                                               X.LocalesNacionales.FormatoLocal,
                                               X.EncargadoId,
                                               X.CalificacionMarca,
-                                              X.CalificacionTelefono
+                                              X.CalificacionTelefono,
+                                              X.CreadoAl
                                           }
                                               ).OrderByDescending(j => j.EncuestaId); //.ToList();
 
                         if (_objIfPDI._dateStart != null && _objIfPDI._dateEnd != null)
                         {
                             if (_objIfPDI._dateEnd >= _objIfPDI._dateStart)
-                                consulta = consulta.Where(x => x.pdiSiteDateTime >= _objIfPDI._dateStart
-                                                      && x.pdiSiteDateTime <= _objIfPDI._dateEnd).OrderByDescending(j => j.pdiId);
+                                consulta = consulta.Where(x => x.CreadoAl >= _objIfPDI._dateStart
+                                                      && x.CreadoAl <= _objIfPDI._dateEnd).OrderByDescending(j => j.EncuestaId);
                         }
 
                         resultado.OBJETO = consulta.ToList();
-                        resultado.MENSAJE = "Listado de Análisis Patológicos consultadas exitosamente";
+                        resultado.MENSAJE = "Listado de Encuestas consultadas exitosamente";
                         resultado.STATUS = "success";
                         return resultado;
 
@@ -121,7 +122,7 @@ namespace ST.Models
 
                 }
 
-            }
+            /*}
             else
             {
                 resultado.OBJETO = null;
@@ -131,11 +132,11 @@ namespace ST.Models
 
 
 
-            }
+            }*/
 
         }
 
-
+        /*
         [HttpGet]
         [Route("PathologicalEntities")]
         public Models.Results PathologicalEntities()
@@ -194,7 +195,8 @@ namespace ST.Models
             }
             return resultado;
         }
-
+        */
+        /*
         [HttpGet]
         [Route("Get/{id:int}")]
         public Models.Results Get(long id)
@@ -300,8 +302,9 @@ namespace ST.Models
 
 
         }
-
+        */
         // POST api/<controller>
+        /*
         [HttpPost]
         [Route("Create")]
         public Models.Results Post([FromBody]Models.Encuestas _objEncuestas)
@@ -415,8 +418,8 @@ namespace ST.Models
 
 
         }
-
-
+        */
+        /*
         [HttpPost]
         [Route("SaveHeader")]
         public Models.Results SaveHeader([FromBody]Models.Encuestas _objEncuestas)
@@ -507,7 +510,8 @@ namespace ST.Models
 
 
         }
-
+        */
+        /*
         [HttpPost]
         [Route("SaveHeaderDetail")]
         public Models.Results SaveHeaderDetail([FromBody]Models.Encuestas _objEncuestas)
@@ -576,7 +580,7 @@ namespace ST.Models
 
                             if (_objEncuestasDetalle.pdidUnitAquasimId != null)
                             {
-                                /*var objPGTmp = dbContextPathological.ProductionGroup.Where(x => x.PGUnitAquasymId == _objEncuestasDetalle.pdidUnitAquasimId && x.IsDeleted != true && x.fgIsClosed == false).FirstOrDefault();*/
+                                
 
                                 // Cuando crean piscinas sin producción Group
 
@@ -614,8 +618,7 @@ namespace ST.Models
                             _objEncuestasDetalle.Images.Select(c => { c.imCreatorUserId = TokenGenerator.GetUserSystem(Request); return c; }).ToList();
 
                             //find header
-                            /*var objEncuestas = dbContextPathological.Encuestas
-                                .Where(x => x.pdiId == _objEncuestasDetalle.pdidEncuestasId).FirstOrDefault();*/
+                            
                             objEncuestas = _objEncuestas;
                             if (objEncuestas != null)
                             {
@@ -630,25 +633,16 @@ namespace ST.Models
                                     //PonerAqui el Delete Fisico si ya ha guardado los registros correctamente                                   
 
                                 }
-                                /*dbContextPathological.Encuestas.Attach(objEncuestas);
-                                dbContextPathological.Entry(objEncuestas).Property(x => x.pdiItemsSaved).IsModified = true;
-                                dbContextPathological.Entry(objEncuestas).Property(x => x.pdiStatus).IsModified = true;*/
+                                
 
 
 
-                                /*dbContextPathological.SaveChanges();
-                                resultado.OBJETO = objEncuestas;
-                                resultado.MENSAJE = "Pathological Data Input created.";
-                                resultado.STATUS = "success";
-                                return resultado;*/
+                                
 
                             }
                             else
                             {
-                                /*resultado.OBJETO = null;
-                                resultado.MENSAJE = "Pathological Header no exist.";
-                                resultado.STATUS = "error";
-                                return resultado;*/
+                                
                             }
                         }
                         dbContextPathological.SaveChanges();
@@ -710,11 +704,13 @@ namespace ST.Models
 
 
         }
+        */
         /// <summary>
         /// 
         /// </summary>
         /// <param name="_objEncuestasDetalle"></param>
         /// <returns></returns>
+        /*
         [HttpPost]
         [Route("SaveDetail")]
         public Models.Results SaveDetail([FromBody]Models.EncuestasDetalle _objEncuestasDetalle)
@@ -763,7 +759,7 @@ namespace ST.Models
 
                         if (_objEncuestasDetalle.pdidUnitAquasimId != null)
                         {
-                            /*var objPGTmp = dbContextPathological.ProductionGroup.Where(x => x.PGUnitAquasymId == _objEncuestasDetalle.pdidUnitAquasimId && x.IsDeleted != true && x.fgIsClosed == false).FirstOrDefault();*/
+                            
 
                             // Cuando crean piscinas sin producción Group
 
@@ -815,47 +811,7 @@ namespace ST.Models
                                 objEncuestas.pdiStatus = 1;
                                 //PonerAqui el Delete Fisico si ya ha guardado los registros correctamente
 
-                                /* List<long> previousIdsIm = dbContextPathological.EncuestasDetalle.AsNoTracking().Include("Images").
-                                 FirstOrDefault(ff => ff.pdidEncuestasId == _objEncuestasDetalle.pdidEncuestasId).Images.Where(t => t.imIsDeleted == true).Select(t => t.imId).ToList();
-
-                                 List<long> currentIdsIm = _objEncuestasDetalle.Images.Where(t => t.imIsDeleted != true)
-                                                       .Select(t => t.imEncuestasDetalleId).ToList();
-                                 List<long> deletedIdsIm = previousIdsIm
-                                    .Except(currentIdsIm).ToList();
-
-
-                                 //Delete children
-
-
-                                 foreach (var deletedId in deletedIdsIm)
-                                 {
-                                    //Models.EncuestasDetalle caracteristicas = dbContextPathological.EncuestasDetalle.Include("Images")
-                                    //    .Single(od => od.pdidId == _objEncuestasDetalle.pdidId && od.pdidId == deletedId);
-                                    //dbContextPathological.EncuestasDetalle.Remove(caracteristicas);
-                                    Models.Images caracteristicas = dbContextPathological.Images
-                                          .Single(od => od.imId == deletedId);
-                                    dbContextPathological.Images.Remove(caracteristicas);
-
-                                 }
-
-
-                                 List<long> previousIds = dbContextPathological.Encuestas.AsNoTracking().Include("EncuestasDetalle").
-                                                               FirstOrDefault(ff => ff.pdiId == objEncuestas.pdiId).EncuestasDetalle.Where(t => t.pdidIsDeleted == true).Select(t => t.pdidId).ToList();
-                                 List<long> currentIds = objEncuestas.EncuestasDetalle.Where(t => t.pdidId == _objEncuestasDetalle.pdidEncuestasId)
-                                                       .Select(t => t.pdidId).ToList();
-                                 List<long> deletedIds = previousIds
-                                    .Except(currentIds).ToList();
-
-
-                                 // Delete children
-
-
-                                 foreach (var deletedId in deletedIds)
-                                 {
-                                    Models.EncuestasDetalle caracteristicas = dbContextPathological.EncuestasDetalle
-                                        .Single(od => od.pdidId == deletedId);
-                                    dbContextPathological.EncuestasDetalle.Remove(caracteristicas);
-                                 }*/
+                                
 
                             }
                             dbContextPathological.Encuestas.Attach(objEncuestas);
@@ -983,9 +939,9 @@ namespace ST.Models
 
 
         }
+        */
 
-
-
+        /*
         [HttpPost]
         [Route("Update")]
         public Models.Results PostUpdate([FromBody]Models.Encuestas _objEncuestas)
@@ -1011,46 +967,10 @@ namespace ST.Models
 
                         //update Items
 
-                        /*var ImagesList = dbContextPathological.Images.Where(x => PathologicaDetailList.Contains(x.imEncuestasDetalleId)).ToList();
-                        dbContextPathological.Images.RemoveRange(ImagesList);*/
+                        
                         dbContextPathological.EncuestasDetalle.RemoveRange(objEncuestas.EncuestasDetalle);
 
-                        /*foreach (var childModel in objEncuestas.EncuestasDetalle)
-                        {
-                            var existingChild = objEncuestas.EncuestasDetalle
-                                .Where(c => c.pdidId == childModel.pdidId && c.pdidId != default(int))
-                                .FirstOrDefault();
-
-
-                            if (existingChild != null)
-                            {
-
-                                childModel.pdidIsDeleted = true;
-                                dbContextPathological.Entry(existingChild).CurrentValues.SetValues(childModel);
-
-                            }
-
-
-                        }
-
-                        foreach (var childModel in objEncuestasDetalle.Images)
-                        {
-                            var existingChild = objEncuestas.EncuestasDetalle
-                                .Where(c => c.pdidId == childModel.imEncuestasDetalleId && c.pdidId != default(int))
-                                .FirstOrDefault();
-
-
-
-                            if (existingChild != null)
-                            {
-
-                                childModel.imIsDeleted = true;
-                                dbContextPathological.Entry(existingChild).CurrentValues.SetValues(childModel);
-                            }
-
-
-                        }
-						*/
+                        
 
                         //update header
                         objEncuestas.Observacion = _objEncuestas.Observacion;
@@ -1095,35 +1015,13 @@ namespace ST.Models
                             .FirstOrDefault();
 
 
-                        /*if (existingChild != null)
-                        {
-
-                            childModel.pdidIsDeleted = false;
-                            dbContextPathological.Entry(existingChild).CurrentValues.SetValues(childModel);
-
-                        }*/
+                        
 
 
                     }
 
 
-                    /*foreach (var childModel in objEncuestasDetalle.Images)
-                    {
-                        var existingChild = objEncuestas.EncuestasDetalle
-                            .Where(c => c.pdidId == childModel.imEncuestasDetalleId && c.pdidIsDeleted == true && c.pdidId != default(int))
-                            .FirstOrDefault();
-
-
-
-                        if (existingChild != null)
-                        {
-
-                            childModel.imIsDeleted = false;
-                            dbContextPathological.Entry(existingChild).CurrentValues.SetValues(childModel);
-                        }
-
-
-                    }*/
+                    
 
                     if (sqlex != null)
                     {
@@ -1153,6 +1051,8 @@ namespace ST.Models
 
 
         }
+        */
+        /*
         [HttpPost]
         [Route("UpdateHeaderDetail")]
         public Models.Results PostUpdateHeaderDetail([FromBody]Models.Encuestas _objEncuestas)
@@ -1178,96 +1078,24 @@ namespace ST.Models
 
                         //update Items
 
-                        /*var ImagesList = dbContextPathological.Images.Where(x => PathologicaDetailList.Contains(x.imEncuestasDetalleId)).ToList();
-                        dbContextPathological.Images.RemoveRange(ImagesList);*/
+                        
                         dbContextPathological.EncuestasDetalle.RemoveRange(objEncuestas.EncuestasDetalle);
 
                         //Encuestas Details
                         foreach (var _objEncuestasDetalle in _objEncuestas.EncuestasDetalle)
                         {
-                            /*if (_objEncuestasDetalle.pdidShrimpQty == null)
-                            {
-                                _objEncuestasDetalle.pdidShrimpQty = 0;
-                                _objEncuestasDetalle.pdidDays = 0;
-                                _objEncuestasDetalle.pdidWeight = 0;
-
-                            }
-
-
-                            if (_objEncuestasDetalle.pdidDays == null)
-                            {
-                                _objEncuestasDetalle.pdidShrimpQty = 0;
-                                _objEncuestasDetalle.pdidDays = 0;
-                                _objEncuestasDetalle.pdidWeight = 0;
-
-                            }
-
-                            if (_objEncuestasDetalle.pdidWeight == null)
-                            {
-                                _objEncuestasDetalle.pdidShrimpQty = 0;
-                                _objEncuestasDetalle.pdidDays = 0;
-                                _objEncuestasDetalle.pdidWeight = 0;
-
-                            }
-
-                            if (_objEncuestasDetalle.pdidChromatophoresQty == null)
-                            {
-                                _objEncuestasDetalle.pdidChromatophoresQty = 0;
-                            }*/
+                            
 
 
 
-                            /*if (_objEncuestasDetalle.pdidUnitAquasimId != null)
-                            {
-                                // Cuando crean piscinas sin producción Group
+                            
 
-                                var objPGClosed = dbContextPathological.Unit.Where(u => u.UniAquasimId == _objEncuestasDetalle.pdidUnitAquasimId).Select(u => new { u.UniHasPGOpened }).FirstOrDefault();
-
-                                if (objPGClosed.Equals(true)) // listLaboratory.Count() == 0
-                                {
-                                    var objPGTmp = dbContextPathological.ProductionGroup.Where(x => x.PGUnitAquasymId == _objEncuestasDetalle.pdidUnitAquasimId).OrderByDescending(a => a.fgID).FirstOrDefault();
-                                    _objEncuestasDetalle.pdidProductionGroupAquasimId = objPGTmp.PGAquasimId;
-
-                                }
-
-                                if (_objEncuestasDetalle.pdidProductionGroupAquasimId.HasValue)
-                                {
-                                    _objEncuestasDetalle.pdidProductionGroupAquasimId = null;
-                                }
-                            }
-                            else
-                            {
-                                //validacion para guardar datos de precrias
-
-                                _objEncuestasDetalle.pdidUnitAquasimId = null;
-                                _objEncuestasDetalle.pdidProductionGroupAquasimId = null;
-
-                            }*/
-
-                            /*_objEncuestasDetalle.Images.Select(c => { c.imCreationTime = DateTime.Now; return c; }).ToList();
-                            _objEncuestasDetalle.Images.Select(c => { c.imCreatorUserId = TokenGenerator.GetUserSystem(Request); return c; }).ToList();*/
+                            
 
                             //find header
                             _objEncuestasDetalle.EncuestaId = _objEncuestas.EncuestaId;
                             dbContextPathological.EncuestasDetalle.Add(_objEncuestasDetalle);
-                            /*objEncuestas = _objEncuestas;
-                            if (objEncuestas != null)
-                            {
-                                _objEncuestasDetalle.pdidEncuestasId = _objEncuestas.pdiId;
-                                dbContextPathological.EncuestasDetalle.Add(_objEncuestasDetalle);
-
-                                objEncuestas.pdiItemsSaved = objEncuestas.pdiItemsSaved + 1;
-
-                                if (objEncuestas.pdiItemTotals == objEncuestas.pdiItemsSaved)
-                                {
-                                    objEncuestas.pdiStatus = 1;
-                                    //PonerAqui el Delete Fisico si ya ha guardado los registros correctamente
-                                }
-                            }
-                            else
-                            {
-
-                            }*/
+                            
                         }
 
                         //update header
@@ -1319,23 +1147,7 @@ namespace ST.Models
                     }
 
 
-                    /*foreach (var childModel in objEncuestasDetalle.Images)
-                    {
-                        var existingChild = objEncuestas.EncuestasDetalle
-                            .Where(c => c.EncuestaDetalleId == childModel.imEncuestasDetalleId && c.EncuestaDetalleId != default(int))
-                            .FirstOrDefault();
-
-
-
-                        if (existingChild != null)
-                        {
-
-                            childModel.imIsDeleted = false;
-                            dbContextPathological.Entry(existingChild).CurrentValues.SetValues(childModel);
-                        }
-
-
-                    }*/
+                    
 
                     if (sqlex != null)
                     {
@@ -1361,6 +1173,7 @@ namespace ST.Models
                 }
             }
         }
+        */
 
         [HttpPost]
         [Route("Delete")]

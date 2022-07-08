@@ -157,15 +157,15 @@ namespace ST.Controllers
                     //desencriptar token
                     var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
                     var tokenS = tokenHandler.ReadJwtToken(token);
-                    var userName = tokenS.Claims.FirstOrDefault(x => x.Type == "UserName")?.Value ?? "";
+                    var userName = tokenS.Claims.FirstOrDefault(x => x.Type == "email")?.Value ?? "";//UserName
                     if (userName != "")
                     {
                         using (var dbContextToken = new Models.ModelHealthAdvisor())
                         {
-                            var user = dbContextToken.UserSystem.First(p => p.usrLogon == userName);
+                            var user = dbContextToken.UserExternal.First(p => p.Username == userName);
                             if (user != null)
                             {
-                                Models.Result permissionsList = Newtonsoft.Json.JsonConvert.DeserializeObject<Models.Result>(user.usrPermissions);
+                                Models.Result permissionsList = Newtonsoft.Json.JsonConvert.DeserializeObject<Models.Result>(user.RefreshToken);//usrPermissions
 
                                 var query1 = permissionsList.Modules
                                                         .Where(p => p.Name == _option)
@@ -228,7 +228,7 @@ namespace ST.Controllers
                     //desencriptar token
                     var tokenHandler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
                     var tokenS = tokenHandler.ReadJwtToken(token);
-                    var usuario = tokenS.Claims.FirstOrDefault(x => x.Type == "UserName")?.Value ?? "";
+                    var usuario = tokenS.Claims.FirstOrDefault(x => x.Type == "email")?.Value ?? "";//UserName
                     return usuario;
                 }
                 else

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -9,7 +10,7 @@ namespace ST.Models
     {
         public LocalesNacionales()
         {
-
+            Encuestas = new HashSet<Encuestas>();
         }
         public string Zona { get; set; }
         public string Ciudad { get; set; }
@@ -20,5 +21,6 @@ namespace ST.Models
         public decimal Longitud { get; set; }
         public string Gerente { get; set; }
         public string FormatoLocal { get; set; }
+        public virtual ICollection<Encuestas> Encuestas { get; set; }
     }
 }

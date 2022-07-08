@@ -20,5 +20,6 @@ namespace ST.Models
         public decimal Porcentaje { get; set; }
         public string Comentario { get; set; }
         public string Adjunto { get; set; }
+        public virtual Encuestas Encuestas { get; set; }
     }
 }

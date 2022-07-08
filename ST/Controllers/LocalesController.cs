@@ -434,5 +434,99 @@ namespace ST.Controllers
                 }
             }
         }
+
+        /// <summary>
+        /// Ge List
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("AllFormat")]
+        public Models.Results GetAllFormat()
+        {
+
+            Models.Results resultado = new Models.Results();
+            
+            using (var dbContextSampleLocation = new Models.ModelHealthAdvisor())
+            {                
+                resultado.OBJETO = dbContextSampleLocation.LocalesNacionales.Select(p=>new { p.FormatoLocal }).Distinct().ToList();
+                resultado.MENSAJE = "Successful Sample Location List";
+                resultado.STATUS = "success";
+                return resultado;
+            }            
+        }
+        /// <summary>
+        /// Ge List
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("AllCity")]
+        public Models.Results GetAllCity()
+        {
+
+            Models.Results resultado = new Models.Results();
+
+            using (var dbContextSampleLocation = new Models.ModelHealthAdvisor())
+            {
+                resultado.OBJETO = dbContextSampleLocation.LocalesNacionales.Select(p => new { p.Ciudad }).Distinct().ToList();
+                resultado.MENSAJE = "Successful Sample Location List";
+                resultado.STATUS = "success";
+                return resultado;
+            }
+        }
+
+        [HttpGet]
+        [Route("LocalEntities")]
+        public Models.Results SamplingEntities()
+        {
+            Models.Results resultado = new Models.Results();
+            //if (TokenGenerator.HasPermissions(Request, "IC_ALARM_RESPONSABLE", "Read"))
+            //{
+            using (var _context = new Models.ModelHealthAdvisor())
+            {
+                var username = TokenGenerator.GetUserSystem(Request);
+                var usuario = _context.UserExternal.Where(t => t.Username.Equals(username)).FirstOrDefault();
+                if (usuario != null)
+                {
+                    //string[] listCompanys = usuario.usrCompanyList.Split('|');
+                    //var listCompanyIds = listCompanys.Select(x => long.Parse(x)).ToList();
+
+
+                    var listado = _context.LocalesNacionales
+                        /*.Include("Site")
+                        .Include("Site.Unit")
+                        .Include("Site.SampleLocationInstance")
+                        .Where(x => listCompanyIds.Contains(x.CompAquasymId) && x.cmpActive == true && x.IsDeleted != true)*/
+
+                         .Select(X => new
+                         {
+                             X.CodigoLocal,
+                             NombreLocal= string.Concat(X.CodigoLocal, "-", X.NombreLocal)/*,
+                             Site = X.Site.Where(a => a.IsDeleted != true).Select(y => new
+                             {
+                                 y.SitAquasymId,
+                                 y.sitName,
+                                 SkrettingSectorId = _context.SkrettingSector.Where(z => z.skseId == y.sitSkrettingSectorId).Select(w => (long?)w.skseId).FirstOrDefault(),
+                                 SkrettingSectorName = _context.SkrettingSector.Where(z => z.skseId == y.sitSkrettingSectorId).Select(w => w.skseName).FirstOrDefault(),
+
+                                 //Unit = y.Unit.Where(t => t.ProductionGroup.Any(p => p.fgIsClosed == false) && t.IsDeleted != true)
+                                 //                                                                             .Select(z => new { z.UniAquasimId, z.uniName }),
+
+                                 //Para traer todas las piscinas
+                                 Unit = y.Unit.Where(t => t.IsDeleted != true)
+                                                                                                                //Unit = y.Unit.Where(t => t.UniHasPGOpened == true && t.IsDeleted != true)    
+                                                                                                                .Select(z => new { z.UniAquasimId, z.uniName, unitActive = z.UniHasPGOpened }),
+                                 SampleLocationInstance = y.SampleLocationInstance.Where(b => b.slinIsDeleted != true).Select(t => new { t.slinId, t.slinKey, t.slinName, t.slinDescription })
+                             })*/
+                         })
+
+                        .ToList();
+
+                    resultado.OBJETO = listado;
+                    resultado.MENSAJE = "";
+                    resultado.STATUS = "success";
+                }
+            }
+            return resultado;
+        }
     }
 }

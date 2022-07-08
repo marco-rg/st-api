@@ -77,7 +77,7 @@ namespace ST.Controllers
             var tokenHandler = new JwtSecurityTokenHandler();
 
             var claims = new ClaimsIdentity(new[] {
-                new Claim(ClaimTypes.Email, user.Username)
+                new Claim(ClaimTypes.Email, user.Username)//ClaimTypes.Email
             });
 
             string secretKey = ConfigurationManager.AppSettings["JWT_SECRET_KEY"];

@@ -14,79 +14,19 @@ namespace ST.Models
             //SelectPdf.GlobalProperties.LicenseKey = "WnFremhva3pja2p6aGp0anppa3RraHRjY2Nj";
         }
 
-        /*public virtual DbSet<Analysis> Analysis { get; set; }
-        public virtual DbSet<AnalysisFeature> AnalysisFeature { get; set; }
-        public virtual DbSet<AnalysisGroup> AnalysisGroup { get; set; }
-        public virtual DbSet<AnalysisGroupFeature> AnalysisGroupFeature { get; set; }
-
-        public virtual DbSet<AnalysisGroupContainer> AnalysisGroupContainer { get; set; }
-        public virtual DbSet<Company> Company { get; set; }
-        public virtual DbSet<Country> Country { get; set; }
-        public virtual DbSet<FormulaParameter> FormulaParameter { get; set; }
-        public virtual DbSet<Images> Images { get; set; }
-        public virtual DbSet<Laboratory> Laboratory { get; set; }
-        public virtual DbSet<LaboratoryDataInput> LaboratoryDataInput { get; set; }
-        public virtual DbSet<LaboratoryDataInputDetail> LaboratoryDataInputDetail { get; set; }
-
-        public virtual DbSet<LaboratoryDataInputLog> LaboratoryDataInputLog { get; set; }
-        public virtual DbSet<LaboratoryDataInputDetailLog> LaboratoryDataInputDetailLog { get; set; }
-
-        public virtual DbSet<LaboratoryDetail> LaboratoryDetail { get; set; }
-        public virtual DbSet<Parameter> Parameter { get; set; }
-        public virtual DbSet<ParameterValue> ParameterValue { get; set; }
-        public virtual DbSet<PathologicalDataInput> PathologicalDataInput { get; set; }
-        public virtual DbSet<PathologicalDataInputDetail> PathologicalDataInputDetail { get; set; }
-        public virtual DbSet<PathologicalKpi> PathologicalKpi { get; set; }
-        public virtual DbSet<ProductionGroup> ProductionGroup { get; set; }
-        public virtual DbSet<Report> Report { get; set; }
-        public virtual DbSet<ReportDetail> ReportDetail { get; set; }
-        public virtual DbSet<Sample> Sample { get; set; }
-        public virtual DbSet<SampleType> SampleType { get; set; }
-        public virtual DbSet<SampleLocation> SampleLocation { get; set; }
-        public virtual DbSet<SampleLocationInstance> SampleLocationInstance { get; set; }
-        public virtual DbSet<Sampling> Sampling { get; set; }
-        public virtual DbSet<SamplingAnalysisFeaturesList> SamplingAnalysisFeaturesList { get; set; }
-        public virtual DbSet<SamplingAnalysisGroupFeaturesList> SamplingAnalysisGroupFeaturesList { get; set; }
-
-        public virtual DbSet<SamplingDetail> SamplingDetail { get; set; }
-        public virtual DbSet<SamplingReferenceMethods> SamplingReferenceMethods { get; set; }
-        public virtual DbSet<SamplingReferenceMethodsByAnalysis> SamplingReferenceMethodsByAnalysis { get; set; }
-
-        public virtual DbSet<ShrimpSector> ShrimpSector { get; set; }
-        public virtual DbSet<Site> Site { get; set; }
-        public virtual DbSet<SiteAddress> SiteAddress { get; set; }
-        public virtual DbSet<SiteGroup> SiteGroup { get; set; }
-        public virtual DbSet<SiteGroupDetail> SiteGroupDetail { get; set; }
-        public virtual DbSet<SkrettingSector> SkrettingSector { get; set; }
-        public virtual DbSet<SkrettingSite> SkrettingSite { get; set; }
-        public virtual DbSet<sysdiagrams> sysdiagrams { get; set; }
-        public virtual DbSet<TechnicalAdvise> TechnicalAdvise { get; set; }
-        public virtual DbSet<TechnicalAdviseLog> TechnicalAdviseLog { get; set; }
-        public virtual DbSet<Unit> Unit { get; set; }*/
         public virtual DbSet<UserSystem> UserSystem { get; set; }
         public virtual DbSet<UserExternal> UserExternal { get; set; }
         public virtual DbSet<SystemParameter> SystemParameter { get; set; }
         public virtual DbSet<Profiles> Profiles { get; set; }
 
         public virtual DbSet<Pregunta> Pregunta { get; set; }
+        public virtual DbSet<PreguntaDetalle> PreguntaDetalle { get; set; }
 
         public virtual DbSet<Categorias> Categorias { get; set; }
         public virtual DbSet<LocalesNacionales> LocalesNacionales { get; set; }
 
         public virtual DbSet<Encuestas> Encuestas { get; set; }
-        public virtual DbSet<EncuestasDetalle> EncuestasDetalle { get; set; }
-        /*public virtual DbSet<Visit> Visit { get; set; }
-
-        public virtual DbSet<ReferenceMethodsDetail> ReferenceMethodsDetail { get; set; }
-        public virtual DbSet<ReferenceMethodsDetailByAnalysis> ReferenceMethodsDetailByAnalysis { get; set; }
-        
-
-        public virtual DbSet<Logs> Logs { get; set; }
-
-        public DbSet<ClientMaster> Clients { get; set; }
-        public DbSet<RefreshToken> RefreshTokens { get; set; }
-
-        public virtual DbSet<SampleDetail> SampleDetail { get; set; }*///para nueva tabla de SampleDetail
+        public virtual DbSet<EncuestasDetalle> EncuestasDetalle { get; set; }        
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
@@ -1433,7 +1373,34 @@ namespace ST.Models
                 .WithOptional(e => e.SystemParameter1)
                 .HasForeignKey(e => e.usrPosition);
 
+            modelBuilder.Entity<Encuestas>().HasKey(p => p.EncuestaId);
+            modelBuilder.Entity<Encuestas>()
+                .Property(c => c.EncuestaId)
+                .HasDatabaseGeneratedOption(DatabaseGeneratedOption.Identity);
+
+            modelBuilder.Entity<Encuestas>()
+                .Property(e => e.EncargadoId)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Encuestas>()
+                .Property(e => e.Observacion)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Encuestas>()
+                .Property(e => e.UserCreatorId)
+                .IsUnicode(false);
+
+            modelBuilder.Entity<Encuestas>()
+                .Property(e => e.UserModifierId)
+                .IsUnicode(false);
+            modelBuilder.Entity<EncuestasDetalle>().HasKey(p => p.EncuestaDetalleId);
+
             modelBuilder.Entity<LocalesNacionales>().HasKey(p => p.CodigoLocal);
+            modelBuilder.Entity<LocalesNacionales>()
+                    .HasMany(e => e.Encuestas)
+                    .WithOptional(e => e.LocalesNacionales)
+                    .HasForeignKey(e => e.CodigoLocal);
+
 
             modelBuilder.Entity<Pregunta>().HasKey(p => p.PreguntaId);
             modelBuilder.Entity<Pregunta>()
