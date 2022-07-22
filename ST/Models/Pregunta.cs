@@ -11,6 +11,7 @@ namespace ST.Models
         public Pregunta()
         {
             PreguntaDetalle = new HashSet<PreguntaDetalle>();
+            EncuestasDetalle = new HashSet<EncuestasDetalle>();
         }
         public int PreguntaId { get; set; }
         public string Descripcion { get; set; }
@@ -25,5 +26,6 @@ namespace ST.Models
 
         public virtual Categorias Categorias { get; set; }
         public virtual ICollection<PreguntaDetalle> PreguntaDetalle { get; set; }
+        public virtual ICollection<EncuestasDetalle> EncuestasDetalle { get; set; }
     }
 }

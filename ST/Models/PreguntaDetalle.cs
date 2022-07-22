@@ -15,7 +15,7 @@ namespace ST.Models
         public string Descripcion { get; set; }
         public bool EsCorrecta { get; set; }
         public DateTime CreadoAl { get; set; }
-        public DateTime ModificadoAl { get; set; }
+        public DateTime? ModificadoAl { get; set; }
         public string UserCreatorId { get; set; }
         public string UserModifierId { get; set; }
         public bool EstaEliminado { get; set; }

@@ -22,6 +22,9 @@ namespace ST.Models
         public virtual DbSet<Pregunta> Pregunta { get; set; }
         public virtual DbSet<PreguntaDetalle> PreguntaDetalle { get; set; }
 
+        public virtual DbSet<Meta> Meta { get; set; }
+        public virtual DbSet<MetaDetalle> MetaDetalle { get; set; }
+
         public virtual DbSet<Categorias> Categorias { get; set; }
         public virtual DbSet<LocalesNacionales> LocalesNacionales { get; set; }
 
@@ -1418,6 +1421,11 @@ namespace ST.Models
             modelBuilder.Entity<Pregunta>()
                 .Property(e => e.UserModifierId)
                 .IsUnicode(false);
+
+            modelBuilder.Entity<Pregunta>()
+                    .HasMany(e => e.EncuestasDetalle)
+                    .WithRequired(e => e.Pregunta)
+                    .HasForeignKey(e => e.PreguntaId);
 
             modelBuilder.Entity<Categorias>().HasKey(p => p.CategoriaId);
             modelBuilder.Entity<Categorias>()

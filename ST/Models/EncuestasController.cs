@@ -90,6 +90,7 @@ namespace ST.Models
                         var consulta = dbContextPathological.Encuestas
                                       .Include("EncuestasDetalle")
                                       .Include("LocalesNacionales")
+                                      .Where(z => z.EstaEliminado != true)
                                           .Select(X => new
                                           {
                                               X.EncuestaId,
@@ -196,7 +197,7 @@ namespace ST.Models
             return resultado;
         }
         */
-        /*
+        
         [HttpGet]
         [Route("Get/{id:int}")]
         public Models.Results Get(long id)
@@ -208,79 +209,45 @@ namespace ST.Models
                 //Models.Encuestas objEncuestas = null;
                 var objEncuestasResult = dbContextPathological.Encuestas
                     .Include("EncuestasDetalle")
-                    .Include("EncuestasDetalle.Images")
-                    //.Include("EncuestasDetalle.SampleLocationInstance")
-                    .Include("Site")
-                    .Include("Site.SkrettingSector")
-                    .Where(p => p.pdiId == id)
+                    //.Include("EncuestasDetalle.Images")
+                    .Include("LocalesNacionales")
+                    .Where(p => p.EncuestaId == id)
                     .Select(X => new
                     {
-                        X.pdiId,
-                        X.pdiSiteDateTime,
-                        X.Site.Company.CompAquasymId,
-                        X.Site.Company.cmpName,
-                        X.Site.SitAquasymId,
-                        X.Site.sitName,
-                        SkrettingSectorId = dbContextPathological.SkrettingSector.Where(z => z.skseId == X.Site.sitSkrettingSectorId).Select(w => (long?)w.skseId).FirstOrDefault(),
-                        SkrettingSectorName = dbContextPathological.SkrettingSector.Where(z => z.skseId == X.Site.sitSkrettingSectorId).Select(w => w.skseName).FirstOrDefault(),
-                        X.pdiRequestedBy,
-                        TechnicalId = X.UserSystem.usrId,
-                        TechnicalName = X.UserSystem.usrFirstName + " " + X.UserSystem.usrLastName,
-                        X.pdiStatus,
-                        X.pdiRecommendation,
+                        X.EncuestaId,
+                        X.CodigoLocal,
+                        X.CreadoAl,
+                        X.LocalesNacionales.NombreLocal,
+                        X.Observacion,
+                        X.EncargadoId,
+                        //TechnicalId = X.UserSystem.usrId,
+                        //TechnicalName = X.UserSystem.usrFirstName + " " + X.UserSystem.usrLastName,
+                        X.EstaEliminado,
+                        /**/
+                        EncuestasDetalle = X.EncuestasDetalle.GroupBy(u => new { u.Pregunta.CategoriaId, u.Pregunta.Categorias.Descripcion })
+                        .Select(P => new {
+                            CategoriaId=P.FirstOrDefault().Pregunta.CategoriaId,
+                            P.FirstOrDefault().Pregunta.Categorias.Descripcion,
+                            Preguntas = X.EncuestasDetalle.Select(d => new {
+                                d.EncuestaId,
+                                d.EncuestaDetalleId,
+                                d.PreguntaId,
+                                d.Peso,
+                                d.Puntaje,
+                                d.Resultado,
+                                d.Porcentaje,
+                                d.Comentario,
+                                d.Adjunto,
+                                CategoriaId = d.Pregunta.CategoriaId
+                            }).Where(y => y.CategoriaId == P.FirstOrDefault().Pregunta.CategoriaId).ToList()
+                        })
+                         .ToList()/*,
                         EncuestasDetalle = X.EncuestasDetalle.Select(P => new
-                        {
-
-                            Images = P.Images.Select(T => new
-                            {
-                                T.imId,
-                                T.imImage,
-                                T.imImagePathFile,
-                                T.imImageFileName,
-                                T.imImageBase64String,
-                                T.imCreatorUserId,
-                                T.imComment
-                            }).ToList(),
-                            UniAquasimId = dbContextPathological.Unit.Where(Z => Z.UniAquasimId == P.pdidUnitAquasimId).Select(y => (long?)y.UniAquasimId).FirstOrDefault(),//x.Unit != null ? x.Unit.UniAquasimId : new Nullable<long>(), // == null ? null :  x.Unit.uniID,
-                            uniName = dbContextPathological.Unit.Where(Z => Z.UniAquasimId == P.pdidUnitAquasimId).Select(y => y.uniName).FirstOrDefault(),//x.Unit != null ? x.Unit.uniName : (string)null,
-                            SlinId = dbContextPathological.SampleLocationInstance.Where(Z => Z.slinId == P.pdiSlinId).Select(y => (long?)y.slinId).FirstOrDefault(),// x.SampleLocationInstance != null ? x.SampleLocationInstance.slinId : new Nullable<long>(), // == null ? null :  x.Unit.uniID,
-                            SlinName = dbContextPathological.SampleLocationInstance.Where(Z => Z.slinId == P.pdiSlinId).Select(y => y.slinName).FirstOrDefault(),
-                            P.pdidId,
-                            P.pdidEncuestasId,
-                            P.pdidUnitAquasimId,
-                            P.pdidShrimpQty,
-                            P.pdidDays,
-                            P.pdidWeight,
-                            P.pdidTextureQty,
-                            P.pdidTextureName,
-                            P.pdidChromatophoresQty,
-                            P.pdidAntennaQty,
-                            P.pdidAntennaName,
-                            P.pdidUropodsQty,
-                            P.pdidUropodsName,
-                            P.pdidGillQty,
-                            P.pdidGillName,
-                            P.pdidNecrosisQty,
-                            P.pdidNecrosisName,
-                            P.pdidEctoparasiteQty,
-                            P.pdidEctoparasiteName,
-                            P.pdidLipidsQty,
-                            P.pdidLipidsName,
-                            P.pdidTubularDeformityQty,
-                            P.pdidTubularDeformityName,
-                            P.pdidGregarineQty,
-                            P.pdidGregarineName,
-                            P.pdidNematodesQty,
-                            P.pdidNematodesName,
-                            P.pdidIntestinalQty,
-                            P.pdidIntestinalName,
-                            P.pdidGametocyteQty,
-                            P.pdidGametocyteName,
-                            P.pdidIsDeleted,
-                            P.pdidComment
-                        }).Where(P => P.pdidIsDeleted != true)
+                        {                            
+                            CategoriaId = P.Pregunta.CategoriaId,
+                            Descripcion = P.Pregunta.Categorias.Descripcion
+                        }).GroupBy(u => new { u.CategoriaId, u.Descripcion }).FirstOrDefault().ToList()*/
                     }).ToList();
-
 
                 if (objEncuestasResult != null)
                 {
@@ -297,12 +264,8 @@ namespace ST.Models
                     return resultado;
                 }
             }
-
-
-
-
         }
-        */
+        
         // POST api/<controller>
         /*
         [HttpPost]
@@ -511,7 +474,7 @@ namespace ST.Models
 
         }
         */
-        /*
+        
         [HttpPost]
         [Route("SaveHeaderDetail")]
         public Models.Results SaveHeaderDetail([FromBody]Models.Encuestas _objEncuestas)
@@ -521,21 +484,21 @@ namespace ST.Models
                 Models.Results resultado = new Models.Results();
                 try
                 {
-                    _objEncuestas.pdiSiteDateTime = new Models.Utilities().convertToTimeZoneEcuador(DateTime.Now);
+                    _objEncuestas.CreadoAl = new Models.Utilities().convertToTimeZoneEcuador(DateTime.Now);
 
                     string userName = TokenGenerator.GetUserSystem(Request);
-                    var user = dbContextPathological.UserSystem.FirstOrDefault(p => p.usrLogon.Equals(userName));
+                    var user = dbContextPathological.UserExternal.FirstOrDefault(p => p.Username.Equals(userName));
 
-                    _objEncuestas.pdiTechnicalUserId = user.usrId;
-                    _objEncuestas.pdiCreatorUserId = user.usrLogon;
-                    _objEncuestas.pdiCreationTime = new Models.Utilities().convertToTimeZoneEcuador(DateTime.Now);
-                    _objEncuestas.pdiLastModificationTime = null;
-                    _objEncuestas.pdiLastModificationUserId = null;
-                    _objEncuestas.pdiDeleterUserId = null;
-                    _objEncuestas.pdiDeletionTime = null;
-                    _objEncuestas.pdiIsDeleted = null;
+                    //_objEncuestas.pdiTechnicalUserId = user.usrId;
+                    _objEncuestas.UserCreatorId = user.Username;
+                    _objEncuestas.CreadoAl = new Models.Utilities().convertToTimeZoneEcuador(DateTime.Now);
+                    _objEncuestas.ModificadoAl = null;
+                    _objEncuestas.UserModifierId = null;
+                    _objEncuestas.UserDeleterId = null;
+                    _objEncuestas.EliminadoAl = null;
+                    _objEncuestas.EstaEliminado = null;
 
-                    _objEncuestas.pdiStatus = 1;
+                    //_objEncuestas.pdiStatus = 1;
 
                     if (ModelState.IsValid)
                     {
@@ -544,107 +507,99 @@ namespace ST.Models
 
                         dbContextPathological.Encuestas.Add(_objEncuestas);
                         //Encuestas Details
+                        var total = 0;
                         foreach (var _objEncuestasDetalle in _objEncuestas.EncuestasDetalle)
                         {
-                            if (_objEncuestasDetalle.pdidShrimpQty == null)
+                            /*if (_objEncuestasDetalle.pdidShrimpQty == null)
                             {
                                 _objEncuestasDetalle.pdidShrimpQty = 0;
                                 _objEncuestasDetalle.pdidDays = 0;
                                 _objEncuestasDetalle.pdidWeight = 0;
-
                             }
-
-
                             if (_objEncuestasDetalle.pdidDays == null)
                             {
                                 _objEncuestasDetalle.pdidShrimpQty = 0;
                                 _objEncuestasDetalle.pdidDays = 0;
                                 _objEncuestasDetalle.pdidWeight = 0;
-
                             }
-
                             if (_objEncuestasDetalle.pdidWeight == null)
                             {
                                 _objEncuestasDetalle.pdidShrimpQty = 0;
                                 _objEncuestasDetalle.pdidDays = 0;
                                 _objEncuestasDetalle.pdidWeight = 0;
-
                             }
-
                             if (_objEncuestasDetalle.pdidChromatophoresQty == null)
                             {
                                 _objEncuestasDetalle.pdidChromatophoresQty = 0;
                             }
-
-
-
                             if (_objEncuestasDetalle.pdidUnitAquasimId != null)
                             {
-                                
-
                                 // Cuando crean piscinas sin producción Group
-
                                 var objPGClosed = dbContextPathological.Unit.Where(u => u.UniAquasimId == _objEncuestasDetalle.pdidUnitAquasimId).Select(u => new { u.UniHasPGOpened }).FirstOrDefault();
-
                                 if (objPGClosed.Equals(true)) // listLaboratory.Count() == 0
                                 {
                                     var objPGTmp = dbContextPathological.ProductionGroup.Where(x => x.PGUnitAquasymId == _objEncuestasDetalle.pdidUnitAquasimId).OrderByDescending(a => a.fgID).FirstOrDefault();
                                     _objEncuestasDetalle.pdidProductionGroupAquasimId = objPGTmp.PGAquasimId;
-
                                 }
-
-
-
                                 if (_objEncuestasDetalle.pdidProductionGroupAquasimId.HasValue)
                                 {
                                     _objEncuestasDetalle.pdidProductionGroupAquasimId = null;
                                 }
-
-
                             }
                             else
                             {
                                 //validacion para guardar datos de precrias
-
                                 _objEncuestasDetalle.pdidUnitAquasimId = null;
                                 _objEncuestasDetalle.pdidProductionGroupAquasimId = null;
-
-                            }
-
-
+                            }*/
                             //if (_objEncuestasDetalle.pdidId != null)
                             //{
-                            _objEncuestasDetalle.Images.Select(c => { c.imCreationTime = DateTime.Now; return c; }).ToList();
+                            /*_objEncuestasDetalle.Images.Select(c => { c.imCreationTime = DateTime.Now; return c; }).ToList();
                             _objEncuestasDetalle.Images.Select(c => { c.imCreatorUserId = TokenGenerator.GetUserSystem(Request); return c; }).ToList();
-
-                            //find header
-                            
+            */
+                            //find header                            
                             objEncuestas = _objEncuestas;
+
+                            _objEncuestasDetalle.Resultado = _objEncuestasDetalle.Peso * _objEncuestasDetalle.Puntaje;
+                            total = total + (_objEncuestasDetalle.Peso * _objEncuestasDetalle.Puntaje);
                             if (objEncuestas != null)
                             {
-
-                                dbContextPathological.EncuestasDetalle.Add(_objEncuestasDetalle);
-
-                                objEncuestas.pdiItemsSaved = objEncuestas.pdiItemsSaved + 1;
-
+                                /*dbContextPathological.EncuestasDetalle.Add(_objEncuestasDetalle);
+                                
                                 if (objEncuestas.pdiItemTotals == objEncuestas.pdiItemsSaved)
                                 {
                                     objEncuestas.pdiStatus = 1;
-                                    //PonerAqui el Delete Fisico si ya ha guardado los registros correctamente                                   
-
-                                }
-                                
-
-
-
-                                
-
+                                    //PonerAqui el Delete Fisico si ya ha guardado los registros correctamente
+                                }*/
                             }
                             else
-                            {
-                                
+                            {                                
                             }
                         }
+                        var result = objEncuestas.EncuestasDetalle.Join(dbContextPathological.Pregunta, enc=> enc.PreguntaId, pre=>pre.PreguntaId,(enc, pre) => new { CategoriaId = pre.CategoriaId, Resultado = enc.Resultado})
+                            .GroupBy(l => l.CategoriaId)
+                            .Select(cl => new //ResultLine
+                            {
+                                CategoriaId = cl.First().CategoriaId,
+                                //Quantity = cl.Count().ToString(),
+                                Subtotal = cl.Sum(c => c.Resultado),
+                            }).ToList();
+                        var objJoin = objEncuestas.EncuestasDetalle.Join(dbContextPathological.Pregunta, enc => enc.PreguntaId, pre => pre.PreguntaId, (enc, pre) => new { CategoriaId = pre.CategoriaId, PreguntaId = enc.PreguntaId }).ToList();
+                        foreach (var _objEncuestasDetalle in _objEncuestas.EncuestasDetalle)
+                        {
+                            var aux = objJoin.FirstOrDefault(a => a.PreguntaId == _objEncuestasDetalle.PreguntaId);
+                            var totalGrupo = result.FirstOrDefault(b => b.CategoriaId == aux.CategoriaId);
+                            _objEncuestasDetalle.Porcentaje = ((decimal)_objEncuestasDetalle.Resultado / (decimal)totalGrupo.Subtotal) *100m;
+                        }
+                        var resultGroup = objEncuestas.EncuestasDetalle.Join(dbContextPathological.Pregunta, enc => enc.PreguntaId, pre => pre.PreguntaId, (enc, pre) => new { CategoriaId = pre.CategoriaId, Porcentaje = enc.Porcentaje })
+                            .GroupBy(l => l.CategoriaId)
+                            .Select(cl => new //ResultLine
+                            {
+                                CategoriaId = cl.First().CategoriaId,
+                                //Quantity = cl.Count().ToString(),
+                                Subtotal = cl.Sum(c => c.Porcentaje),
+                            }).ToList();
+                        objEncuestas.CalificacionTelefono = resultGroup.FirstOrDefault().Subtotal;
                         dbContextPathological.SaveChanges();
                         resultado.OBJETO = objEncuestas;
                         resultado.MENSAJE = "Pathological Data Input created.";
@@ -704,7 +659,7 @@ namespace ST.Models
 
 
         }
-        */
+        
         /// <summary>
         /// 
         /// </summary>

@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ST.Models
 {
+    [Table("EncuestasDetalle")]
     public class EncuestasDetalle
     {
         public EncuestasDetalle()
@@ -21,5 +19,6 @@ namespace ST.Models
         public string Comentario { get; set; }
         public string Adjunto { get; set; }
         public virtual Encuestas Encuestas { get; set; }
+        public virtual Pregunta Pregunta { get; set; }
     }
 }
