@@ -10,18 +10,18 @@ namespace ST.Models
         public int MetaDetalleId { get; set; }
         public int MetaId { get; set; }
         public byte Mes { get; set; }
-        public short? MetaCe { get; set; }
-        public short? CumplimientoCe { get; set; }
+        public decimal? MetaCe { get; set; }
+        public decimal? CumplimientoCe { get; set; }
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public decimal? PorcentajeCe { get; set; }
 
-        public short? MetaCh { get; set; }
-        public short? CumplimientoCh { get; set; }
+        public decimal? MetaCh { get; set; }
+        public decimal? CumplimientoCh { get; set; }
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public decimal? PorcentajeCh { get; set; }
 
-        public short? MetaSe { get; set; }
-        public short? CumplimientoSe { get; set; }
+        public decimal? MetaSe { get; set; }
+        public decimal? CumplimientoSe { get; set; }
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public decimal? PorcentajeSe { get; set; }
 

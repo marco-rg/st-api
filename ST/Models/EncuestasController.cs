@@ -6,7 +6,7 @@ using System.Web.Http.Cors;
 
 namespace ST.Models
 {
-    [EnableCors(origins: "http://localhost:4200", headers: "*", methods: "*")]    
+    [EnableCors(origins: "http://localhost:4200 , http://ctec.support-royalticgroup.com", headers: "*", methods: "*")]    
     [RoutePrefix("api/Encuestas")]
     public class EncuestasController : ApiController
     {
@@ -508,6 +508,7 @@ namespace ST.Models
                         dbContextPathological.Encuestas.Add(_objEncuestas);
                         //Encuestas Details
                         var total = 0;
+
                         foreach (var _objEncuestasDetalle in _objEncuestas.EncuestasDetalle)
                         {
                             /*if (_objEncuestasDetalle.pdidShrimpQty == null)
@@ -559,7 +560,13 @@ namespace ST.Models
             */
                             //find header                            
                             objEncuestas = _objEncuestas;
+                            //Pregunta-Categoria
+                            var objPregCat = objEncuestas.EncuestasDetalle.Join(dbContextPathological.Pregunta, enc => enc.PreguntaId, pre => pre.PreguntaId, (enc, pre) => new { CategoriaId = pre.CategoriaId, PreguntaId = enc.PreguntaId }).ToList();
+                            var aux = objPregCat.FirstOrDefault(a => a.PreguntaId == _objEncuestasDetalle.PreguntaId);
+                            if (true)
+                            {
 
+                            }
                             _objEncuestasDetalle.Resultado = _objEncuestasDetalle.Peso * _objEncuestasDetalle.Puntaje;
                             total = total + (_objEncuestasDetalle.Peso * _objEncuestasDetalle.Puntaje);
                             if (objEncuestas != null)
@@ -599,7 +606,8 @@ namespace ST.Models
                                 //Quantity = cl.Count().ToString(),
                                 Subtotal = cl.Sum(c => c.Porcentaje),
                             }).ToList();
-                        objEncuestas.CalificacionTelefono = resultGroup.FirstOrDefault().Subtotal;
+                        objEncuestas.CalificacionMarca = resultGroup.FirstOrDefault().Subtotal;//Calificación Local
+
                         dbContextPathological.SaveChanges();
                         resultado.OBJETO = objEncuestas;
                         resultado.MENSAJE = "Pathological Data Input created.";

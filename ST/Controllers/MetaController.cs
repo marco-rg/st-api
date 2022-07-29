@@ -9,11 +9,12 @@ using System.Web.Http;
 using System.Web.Http.Cors;
 using ExcelDataReader;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace ST.Controllers
 {
     //[Authorize]
-    [EnableCors(origins: "http://localhost:4200", headers: "*", methods: "*")]
+    [EnableCors(origins: "http://localhost:4200 , http://ctec.support-royalticgroup.com", headers: "*", methods: "*")]
     [RoutePrefix("api/Meta")]
     public class MetaController : ApiController
     {
@@ -32,25 +33,55 @@ namespace ST.Controllers
             Models.Results resultado = new Models.Results();
             //if (TokenGenerator.HasPermissions(Request, "HA_SITE_GROUP", "Read"))
             //{
-            using (var dbContextReferenceMethods = new Models.ModelHealthAdvisor())
+            try
+            {
+                using (var dbContextReferenceMethods = new Models.ModelHealthAdvisor())
+                {
+                    var months = Enumerable.Range(1, 12).Select(i => new { I = i, M = DateTimeFormatInfo.CurrentInfo.GetMonthName(i) }).ToList();
+
+                    var data = dbContextReferenceMethods.MetaDetalle
+                    .Include("Meta")
+                    //.AsEnumerable()
+                    //.Where(t => t.refDetIsDeleted != true)
+                    .Select(x => new
+                    {
+                        x.MetaDetalleId,
+                        x.Meta.LocalId,
+                        LocalNombre = dbContextReferenceMethods.LocalesNacionales.FirstOrDefault(y => y.CodigoLocal == x.Meta.LocalId).NombreLocal,
+                        //Mes = months.FirstOrDefault(a => a.I == x.Mes).M,// string.Format("{0:MMMM}", x.Mes),
+                        Mes = x.Mes,
+                        x.PorcentajeCe,
+                        x.PorcentajeCh,
+                        x.PorcentajeSe
+                    })
+                    .Where(z=>z.PorcentajeCe>0)
+                    .ToList();
+
+                    resultado.OBJETO = data.Select(x => new
+                    {
+                        x.MetaDetalleId,
+                        x.LocalId,
+                        x.LocalNombre,
+                        //Mes = months.FirstOrDefault(a => a.I == x.Mes).M,// string.Format("{0:MMMM}", x.Mes),
+                        Mes = months.FirstOrDefault(a => a.I == x.Mes).M,
+                        x.PorcentajeCe,
+                        x.PorcentajeCh,
+                        x.PorcentajeSe
+                    })
+                    .Where(z => z.PorcentajeCe > 0)
+                    .ToList();
+
+                    resultado.MENSAJE = "Listado de reference methods consultadas exitosamente";
+                    resultado.STATUS = "success";
+                    return resultado;
+                }
+            }
+            catch (Exception ex)
             {
 
-                resultado.OBJETO = dbContextReferenceMethods.Meta
-                .Include("MetaDetalle")
-                //.Where(t => t.refDetIsDeleted != true)
-                .Select(x => new
-                {
-                    x.MetaId,
-                    x.LocalId,
-                    x.MetaTotalCe,
-                    x.CumplimientoTotalCe
-                })
-                .ToList();
-
-                resultado.MENSAJE = "Listado de reference methods consultadas exitosamente";
-                resultado.STATUS = "success";
-                return resultado;
+                throw ex;
             }
+            
             //}
             //else
             //{

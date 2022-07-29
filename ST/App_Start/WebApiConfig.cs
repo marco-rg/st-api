@@ -8,7 +8,7 @@ namespace ST
         public static void Register(HttpConfiguration config)
         {
             // Configuración y servicios de API web
-            config.EnableCors(new EnableCorsAttribute("http://localhost:4200", "*", "*"));
+            config.EnableCors(new EnableCorsAttribute("http://localhost:4200 , http://ctec.support-royalticgroup.com", "*", "*"));
             // Rutas de API web
             config.MapHttpAttributeRoutes();
 
