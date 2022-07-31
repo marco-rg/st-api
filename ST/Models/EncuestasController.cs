@@ -563,11 +563,22 @@ namespace ST.Models
                             //Pregunta-Categoria
                             var objPregCat = objEncuestas.EncuestasDetalle.Join(dbContextPathological.Pregunta, enc => enc.PreguntaId, pre => pre.PreguntaId, (enc, pre) => new { CategoriaId = pre.CategoriaId, PreguntaId = enc.PreguntaId }).ToList();
                             var aux = objPregCat.FirstOrDefault(a => a.PreguntaId == _objEncuestasDetalle.PreguntaId);
-                            if (true)
+                            if (aux.CategoriaId==1)
                             {
-
+                                _objEncuestasDetalle.Resultado = _objEncuestasDetalle.Peso * _objEncuestasDetalle.Puntaje;
                             }
-                            _objEncuestasDetalle.Resultado = _objEncuestasDetalle.Peso * _objEncuestasDetalle.Puntaje;
+                            else
+                            {
+                                var esCorrecta = dbContextPathological.PreguntaDetalle.FirstOrDefault(n => n.PreguntaDetalleId == _objEncuestasDetalle.Puntaje).EsCorrecta;
+                                if (esCorrecta)
+                                {
+                                    _objEncuestasDetalle.Resultado = _objEncuestasDetalle.Peso * 1;
+                                }
+                                else
+                                {
+                                    _objEncuestasDetalle.Resultado = _objEncuestasDetalle.Peso * 0;
+                                }                                
+                            }                            
                             total = total + (_objEncuestasDetalle.Peso * _objEncuestasDetalle.Puntaje);
                             if (objEncuestas != null)
                             {
