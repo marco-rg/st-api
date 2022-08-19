@@ -220,13 +220,15 @@ namespace ST.Models
                         X.LocalesNacionales.NombreLocal,
                         X.Observacion,
                         X.EncargadoId,
+                        X.CalificacionMarca,
+                        X.CalificacionTelefono,
                         //TechnicalId = X.UserSystem.usrId,
                         //TechnicalName = X.UserSystem.usrFirstName + " " + X.UserSystem.usrLastName,
                         X.EstaEliminado,
                         /**/
                         EncuestasDetalle = X.EncuestasDetalle.GroupBy(u => new { u.Pregunta.CategoriaId, u.Pregunta.Categorias.Descripcion })
                         .Select(P => new {
-                            CategoriaId=P.FirstOrDefault().Pregunta.CategoriaId,
+                            CategoriaId = P.FirstOrDefault().Pregunta.CategoriaId,
                             P.FirstOrDefault().Pregunta.Categorias.Descripcion,
                             Preguntas = X.EncuestasDetalle.Select(d => new {
                                 d.EncuestaId,
@@ -241,13 +243,24 @@ namespace ST.Models
                                 CategoriaId = d.Pregunta.CategoriaId
                             }).Where(y => y.CategoriaId == P.FirstOrDefault().Pregunta.CategoriaId).ToList()
                         })
-                         .ToList()/*,
-                        EncuestasDetalle = X.EncuestasDetalle.Select(P => new
-                        {                            
-                            CategoriaId = P.Pregunta.CategoriaId,
-                            Descripcion = P.Pregunta.Categorias.Descripcion
-                        }).GroupBy(u => new { u.CategoriaId, u.Descripcion }).FirstOrDefault().ToList()*/
-                    }).ToList();
+                         .ToList(),
+                        IndicadoresDetalle = dbContextPathological.MetaDetalle//.Include("Meta")
+                         .Where(t => t.PorcentajeCe > 0 && t.PorcentajeCh > 0 && t.PorcentajeSe > 0 && t.Meta.LocalId == X.CodigoLocal)
+                         .Select(y => new
+                         {
+                             //y.Meta.LocalId,
+                             Mes= y.Mes,//string.Format("{0} {1}", "Month", y.Mes),//
+                             y.PorcentajeCe,
+                             y.PorcentajeCh,
+                             y.PorcentajeSe
+                         }).OrderByDescending(c => c.Mes).Take(3).ToList()
+                             /*,
+                            EncuestasDetalle = X.EncuestasDetalle.Select(P => new
+                            {                            
+                                CategoriaId = P.Pregunta.CategoriaId,
+                                Descripcion = P.Pregunta.Categorias.Descripcion
+                            }).GroupBy(u => new { u.CategoriaId, u.Descripcion }).FirstOrDefault().ToList()*/
+                         }).ToList();
 
                 if (objEncuestasResult != null)
                 {
@@ -594,20 +607,28 @@ namespace ST.Models
                             {                                
                             }
                         }
-                        var result = objEncuestas.EncuestasDetalle.Join(dbContextPathological.Pregunta, enc=> enc.PreguntaId, pre=>pre.PreguntaId,(enc, pre) => new { CategoriaId = pre.CategoriaId, Resultado = enc.Resultado})
+                        var result = objEncuestas.EncuestasDetalle.Join(dbContextPathological.Pregunta, enc=> enc.PreguntaId, pre=>pre.PreguntaId,(enc, pre) => new { CategoriaId = pre.CategoriaId, Resultado = enc.Resultado, Peso = enc.Peso})
                             .GroupBy(l => l.CategoriaId)
                             .Select(cl => new //ResultLine
                             {
                                 CategoriaId = cl.First().CategoriaId,
                                 //Quantity = cl.Count().ToString(),
                                 Subtotal = cl.Sum(c => c.Resultado),
+                                SubPeso = cl.Sum(c=> c.Peso)
                             }).ToList();
                         var objJoin = objEncuestas.EncuestasDetalle.Join(dbContextPathological.Pregunta, enc => enc.PreguntaId, pre => pre.PreguntaId, (enc, pre) => new { CategoriaId = pre.CategoriaId, PreguntaId = enc.PreguntaId }).ToList();
                         foreach (var _objEncuestasDetalle in _objEncuestas.EncuestasDetalle)
                         {
                             var aux = objJoin.FirstOrDefault(a => a.PreguntaId == _objEncuestasDetalle.PreguntaId);
                             var totalGrupo = result.FirstOrDefault(b => b.CategoriaId == aux.CategoriaId);
-                            _objEncuestasDetalle.Porcentaje = ((decimal)_objEncuestasDetalle.Resultado / (decimal)totalGrupo.Subtotal) *100m;
+                            if (aux.CategoriaId==1)
+                            {
+                                _objEncuestasDetalle.Porcentaje = ((decimal)_objEncuestasDetalle.Resultado / (decimal)totalGrupo.Subtotal) * 100m;
+                            }
+                            else
+                            {
+                                _objEncuestasDetalle.Porcentaje = ((decimal)_objEncuestasDetalle.Resultado / (decimal)totalGrupo.SubPeso) * 100m;
+                            }                            
                         }
                         var resultGroup = objEncuestas.EncuestasDetalle.Join(dbContextPathological.Pregunta, enc => enc.PreguntaId, pre => pre.PreguntaId, (enc, pre) => new { CategoriaId = pre.CategoriaId, Porcentaje = enc.Porcentaje })
                             .GroupBy(l => l.CategoriaId)
@@ -618,6 +639,7 @@ namespace ST.Models
                                 Subtotal = cl.Sum(c => c.Porcentaje),
                             }).ToList();
                         objEncuestas.CalificacionMarca = resultGroup.FirstOrDefault().Subtotal;//Calificación Local
+                        objEncuestas.CalificacionTelefono = resultGroup.LastOrDefault().Subtotal;
 
                         dbContextPathological.SaveChanges();
                         resultado.OBJETO = objEncuestas;

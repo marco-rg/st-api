@@ -27,7 +27,7 @@ namespace ST.Controllers
             using (var dbContextPregunta = new Models.ModelHealthAdvisor())
             {
 
-                resultado.OBJETO = dbContextPregunta.Pregunta.Include("Categorias").Where(t => t.CategoriaId > 0).ToList();//
+                resultado.OBJETO = dbContextPregunta.Pregunta.Include("Categorias").Where(t => t.CategoriaId > 0 && t.EstaEliminado == false).ToList();//
                 resultado.MENSAJE = "Successful Sample Type List ";
                 resultado.STATUS = "success";
                 return resultado;
