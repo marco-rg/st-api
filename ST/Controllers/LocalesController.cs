@@ -500,7 +500,18 @@ namespace ST.Controllers
                          .Select(X => new
                          {
                              X.CodigoLocal,
-                             NombreLocal= string.Concat(X.CodigoLocal, "-", X.NombreLocal)/*,
+                             NombreLocal= string.Concat(X.CodigoLocal, "-", X.NombreLocal),
+                             HistorialDetalle = _context.Encuestas//.Include("Meta")
+                                 .Where(t => t.CodigoLocal == X.CodigoLocal)
+                                 .Select(y => new
+                                 {
+                                     y.EncuestaId,
+                                     y.CodigoLocal,
+                                     y.LocalesNacionales.NombreLocal,
+                                     y.CreadoAl,
+                                     y.CalificacionMarca,
+                                     y.CalificacionTelefono
+                                 }).OrderByDescending(c => c.CreadoAl).Take(3).ToList()/*,
                              Site = X.Site.Where(a => a.IsDeleted != true).Select(y => new
                              {
                                  y.SitAquasymId,
