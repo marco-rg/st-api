@@ -502,7 +502,7 @@ namespace ST.Controllers
                              X.CodigoLocal,
                              NombreLocal= string.Concat(X.CodigoLocal, "-", X.NombreLocal),
                              HistorialDetalle = _context.Encuestas//.Include("Meta")
-                                 .Where(t => t.CodigoLocal == X.CodigoLocal)
+                                 .Where(t => t.CodigoLocal == X.CodigoLocal && t.EstaEliminado != true)
                                  .Select(y => new
                                  {
                                      y.EncuestaId,

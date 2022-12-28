@@ -15,18 +15,18 @@ namespace ST.Models
         public int MetaId { get; set; }
         public int LocalId { get; set; }
         public int NumAnio { get; set; }
-        public int MetaTotalCe { get; set; }
-        public int CumplimientoTotalCe { get; set; }
+        public decimal MetaTotalCe { get; set; }
+        public decimal CumplimientoTotalCe { get; set; }
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public decimal PorcentajeTotalCe { get; set; }
 
-        public int MetaTotalCh { get; set; }
-        public int CumplimientoTotalCh { get; set; }
+        public decimal MetaTotalCh { get; set; }
+        public decimal CumplimientoTotalCh { get; set; }
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public decimal PorcentajeTotalCh { get; set; }
 
-        public int MetaTotalSe { get; set; }
-        public int CumplimientoTotalSe { get; set; }
+        public decimal MetaTotalSe { get; set; }
+        public decimal CumplimientoTotalSe { get; set; }
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public decimal PorcentajeTotalSe { get; set; }
         public virtual ICollection<MetaDetalle> MetaDetalle { get; set; }

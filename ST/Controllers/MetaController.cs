@@ -113,7 +113,7 @@ namespace ST.Controllers
                 Stream FileStream = null;
                 #endregion
 
-                #region Save Student Detail From Excel
+                #region Save Data Detail From Excel
                 using (var objEntity = new Models.ModelHealthAdvisor())
                 {
                     if (httpRequest.Files.Count > 0)
@@ -143,79 +143,69 @@ namespace ST.Controllers
 
                                 int output = 0;
                                 string localActual = "";
-                                for (int j = 4; j < dtCelulares.Rows.Count-1; j++)
+                                for (int j = 4; j <= dtCelulares.Rows.Count-1; j++)
                                 {
                                     var cabMeta = new Models.Meta();
 
                                     cabMeta.LocalId = Convert.ToInt32(dtCelulares.Rows[j][2].ToString().Split('-')[0]);
                                     cabMeta.NumAnio = Convert.ToInt32(dtCelulares.Rows[0][0].ToString().Split(' ')[1]);
-                                    cabMeta.MetaTotalCe = 7;
-                                    cabMeta.CumplimientoTotalCe = 7;
-                                    cabMeta.MetaTotalCh = 7;
-                                    cabMeta.CumplimientoTotalCh = 7;
-                                    cabMeta.MetaTotalSe = 7;
-                                    cabMeta.CumplimientoTotalSe = 7;
+                                    decimal metaTotalCe = 0;
+                                    decimal cumplimientoTotalCe = 0;
+                                    decimal metaTotalCh = 0;
+                                    decimal cumplimientoTotalCh = 0;
+                                    decimal metaTotalSe = 0;
+                                    decimal cumplimientoTotalSe = 0;
 
                                     localActual = dtCelulares.Rows[j][2].ToString();
-                                    /*cabMeta.MetaTotalCh = 8;
-                                    cabMeta.CumplimientoTotalCh = 8;
-                                    cabMeta.MetaTotalSe = 9;
-                                    cabMeta.CumplimientoTotalSe = 9;*/
+                                    
                                     // go through each column in the row
                                     for (int i = 3; i <= 36; i=i+3)
                                     {
                                         var detMeta = new Models.MetaDetalle();
-                                        // access cell as set or get
-                                        // dr[i] = "something";
-                                        // string something = Convert.ToString(dr[i]);
+                                        
                                         if (dtCelulares.Rows[j][0] != DBNull.Value)
                                         {
                                             if (dtCelulares.Rows[3][i].ToString() != "%")
                                             {
                                                 detMeta.Mes = Convert.ToByte(i/3);
-                                                detMeta.MetaCe = Convert.ToInt16(dtCelulares.Rows[j][i]);
-                                                detMeta.CumplimientoCe = Convert.ToInt16(dtCelulares.Rows[j][i + 1] == DBNull.Value ? "0" : dtCelulares.Rows[j][i + 1]);
+                                                detMeta.MetaCe = Convert.ToDecimal(dtCelulares.Rows[j][i] == DBNull.Value ? "0": dtCelulares.Rows[j][i]);
+                                                detMeta.CumplimientoCe = Convert.ToDecimal(dtCelulares.Rows[j][i + 1] == DBNull.Value ? "0" : dtCelulares.Rows[j][i + 1]);
+                                                metaTotalCe = Convert.ToDecimal(metaTotalCe + detMeta.MetaCe);
+                                                cumplimientoTotalCe = Convert.ToDecimal(cumplimientoTotalCe + detMeta.CumplimientoCe);
 
-                                                //detMeta.MetaCh = dv.FindRows[0];
                                                 IEnumerable<DataRow> dtChipFiltered = dtChips.AsEnumerable()
                                                   .Where(row => row.Field<String>("Column2") == localActual)
                                                   .OrderByDescending(row => row.Field<String>("Column2"));
 
                                                 foreach (var dr in dtChipFiltered)
-                                                {
-                                                    //.CopyToDataTable();
-                                                    detMeta.MetaCh = Convert.ToInt16(dr[i]);
-                                                    detMeta.CumplimientoCh = Convert.ToInt16(dr[i + 1] == DBNull.Value ? "0" : dr[i + 1]);
-                                                    //dataView.RowFilter = String.Format("Name LIKE '{0}*'", EscapeLikeValue(value));
-                                                }
-
-
-                                                //detMeta.MetaCh = dv.FindRows[0];
+                                                {                                                    
+                                                    detMeta.MetaCh = Convert.ToDecimal(dr[i] == DBNull.Value ? "0" : dr[i]);
+                                                    detMeta.CumplimientoCh = Convert.ToDecimal(dr[i + 1] == DBNull.Value ? "0" : dr[i + 1]);
+                                                    metaTotalCh = Convert.ToDecimal(metaTotalCh + detMeta.MetaCh);
+                                                    cumplimientoTotalCh = Convert.ToDecimal(cumplimientoTotalCh + detMeta.CumplimientoCh);
+                                                }                                                
                                                 IEnumerable<DataRow> dtServicioFiltered = dtServicio.AsEnumerable()
                                                   .Where(row => row.Field<String>("Column2") == localActual)
                                                   .OrderByDescending(row => row.Field<String>("Column2"));
 
                                                 foreach (var dr in dtServicioFiltered)
-                                                {
-                                                    //.CopyToDataTable();
-                                                    detMeta.MetaSe = Convert.ToInt16(dr[i]);
-                                                    detMeta.CumplimientoSe = Convert.ToInt16(dr[i + 1] == DBNull.Value ? "0" : dr[i + 1]);
-                                                    //dataView.RowFilter = String.Format("Name LIKE '{0}*'", EscapeLikeValue(value));
-                                                }
-                                                /*DataTable dtServicioFiltered = dtServicio.AsEnumerable()
-                                                  .Where(row => row.Field<String>("Column2") == localActual)
-                                                  .OrderByDescending(row => row.Field<String>("Column2"))
-                                                  .CopyToDataTable();
-                                                if (dtServicioFiltered.Rows.Count>0)
-                                                {
-                                                    detMeta.MetaSe = Convert.ToInt16(dtServicioFiltered.Rows[0][i]);
-                                                    detMeta.CumplimientoSe = Convert.ToInt16(dtServicioFiltered.Rows[0][i + 1] == DBNull.Value ? "0" : dtServicioFiltered.Rows[0][i + 1]);
-                                                }*/
-                                                //dataView.RowFilter = String.Format("Name LIKE '{0}*'", EscapeLikeValue(value));
+                                                {                                                    
+                                                    detMeta.MetaSe = Convert.ToDecimal(dr[i] == DBNull.Value ? "0" : dr[i]);
+                                                    detMeta.CumplimientoSe = Convert.ToDecimal(dr[i + 1] == DBNull.Value ? "0" : dr[i + 1]);
+                                                    metaTotalSe = Convert.ToDecimal(metaTotalSe + detMeta.MetaSe);
+                                                    cumplimientoTotalSe = Convert.ToDecimal(cumplimientoTotalSe + detMeta.CumplimientoSe);
+                                                }                                                
                                             }
                                         }
                                         cabMeta.MetaDetalle.Add(detMeta);
                                     }
+                                    cabMeta.MetaTotalCe = metaTotalCe;
+                                    cabMeta.CumplimientoTotalCe = cumplimientoTotalCe;
+                                    cabMeta.MetaTotalCh = metaTotalCh;
+                                    cabMeta.CumplimientoTotalCh = cumplimientoTotalCh;
+                                    cabMeta.MetaTotalSe = metaTotalSe;
+                                    cabMeta.CumplimientoTotalSe = cumplimientoTotalSe;
+
                                     objEntity.Meta.Add(cabMeta);
                                     output = objEntity.SaveChanges();
                                 }
