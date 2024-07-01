@@ -14,7 +14,7 @@ using System.Globalization;
 namespace ST.Controllers
 {
     //[Authorize]
-    [EnableCors(origins: "http://localhost:4200 , http://ctec.support-royalticgroup.com", headers: "*", methods: "*")]
+    [EnableCors(origins: "http://localhost:4200 , https://ctec.sydfast.com , http://ctec.sydfast.com", headers: "*", methods: "*")]
     [RoutePrefix("api/Meta")]
     public class MetaController : ApiController
     {
@@ -140,26 +140,29 @@ namespace ST.Controllers
                                 var dtCelulares = dsexcelRecords.Tables["Celulares"];
                                 var dtChips = dsexcelRecords.Tables["Chips"];
                                 var dtServicio = dsexcelRecords.Tables["Servicio"];
-
+                                var dtMicas = dsexcelRecords.Tables["Micas"];
+                                var headerRow = dtCelulares.Rows[3];//In row 3 is the table header of the spreadsheet
                                 int output = 0;
                                 string localActual = "";
-                                for (int j = 4; j <= dtCelulares.Rows.Count-1; j++)
+                                for (int j = 9; j <= dtCelulares.Rows.Count-1; j++)//4
                                 {
                                     var cabMeta = new Models.Meta();
 
                                     cabMeta.LocalId = Convert.ToInt32(dtCelulares.Rows[j][2].ToString().Split('-')[0]);
-                                    cabMeta.NumAnio = Convert.ToInt32(dtCelulares.Rows[0][0].ToString().Split(' ')[1]);
+                                    cabMeta.NumAnio = DateTime.Now.Year;//Convert.ToInt32(dtCelulares.Rows[0][0].ToString().Split(' ')[1]);
                                     decimal metaTotalCe = 0;
                                     decimal cumplimientoTotalCe = 0;
                                     decimal metaTotalCh = 0;
                                     decimal cumplimientoTotalCh = 0;
                                     decimal metaTotalSe = 0;
                                     decimal cumplimientoTotalSe = 0;
+                                    decimal metaTotalMi = 0;
+                                    decimal cumplimientoTotalMi = 0;
 
                                     localActual = dtCelulares.Rows[j][2].ToString();
                                     
                                     // go through each column in the row
-                                    for (int i = 3; i <= 36; i=i+3)
+                                    for (int i = 3; i <= 12; i=i+3)//3 - 36
                                     {
                                         var detMeta = new Models.MetaDetalle();
                                         
@@ -190,11 +193,24 @@ namespace ST.Controllers
 
                                                 foreach (var dr in dtServicioFiltered)
                                                 {                                                    
-                                                    detMeta.MetaSe = Convert.ToDecimal(dr[i] == DBNull.Value ? "0" : dr[i]);
-                                                    detMeta.CumplimientoSe = Convert.ToDecimal(dr[i + 1] == DBNull.Value ? "0" : dr[i + 1]);
+                                                    detMeta.MetaSe = Math.Round(Convert.ToDecimal(dr[i] == DBNull.Value ? "0" : dr[i]), 2);
+                                                    detMeta.CumplimientoSe = Math.Round(Convert.ToDecimal(dr[i + 1] == DBNull.Value ? "0" : dr[i + 1]), 2);
                                                     metaTotalSe = Convert.ToDecimal(metaTotalSe + detMeta.MetaSe);
                                                     cumplimientoTotalSe = Convert.ToDecimal(cumplimientoTotalSe + detMeta.CumplimientoSe);
-                                                }                                                
+                                                }  
+                                                
+                                                //
+                                                IEnumerable<DataRow> dtMicaFiltered = dtMicas.AsEnumerable()
+                                                    .Where(row => row.Field<String>("Column2") == localActual)
+                                                    .OrderByDescending(row => row.Field<String>("Column2"));
+
+                                                foreach (var dr in dtMicaFiltered)
+                                                {                                                    
+                                                    detMeta.MetaMi = Math.Round(Convert.ToDecimal(dr[i] == DBNull.Value ? "0" : dr[i]), 2);
+                                                    detMeta.CumplimientoMi = Math.Round(Convert.ToDecimal(dr[i + 1] == DBNull.Value ? "0" : dr[i + 1]), 2);
+                                                    metaTotalMi = Convert.ToDecimal(metaTotalMi + detMeta.MetaMi);
+                                                    cumplimientoTotalMi = Convert.ToDecimal(cumplimientoTotalMi + detMeta.CumplimientoMi);
+                                                }
                                             }
                                         }
                                         cabMeta.MetaDetalle.Add(detMeta);
@@ -205,7 +221,8 @@ namespace ST.Controllers
                                     cabMeta.CumplimientoTotalCh = cumplimientoTotalCh;
                                     cabMeta.MetaTotalSe = metaTotalSe;
                                     cabMeta.CumplimientoTotalSe = cumplimientoTotalSe;
-
+                                    cabMeta.MetaTotalMi = metaTotalMi;
+                                    cabMeta.CumplimientoTotalMi = cumplimientoTotalMi;
                                     objEntity.Meta.Add(cabMeta);
                                     output = objEntity.SaveChanges();
                                 }
@@ -233,5 +250,173 @@ namespace ST.Controllers
             }
         }
 
+        [Route("ReadFile2")]
+        [HttpPost]
+        public IHttpActionResult ReadFile2()
+        {
+            /*
+            var httpRequest = HttpContext.Current.Request;
+            if (httpRequest.Files.Count == 0)
+                return BadRequest("No file uploaded.");
+
+            var file = httpRequest.Files[0];
+            if (file == null || file.InputStream == null)
+                return BadRequest("Invalid file.");
+
+            if (!file.FileName.EndsWith(".xls") && !file.FileName.EndsWith(".xlsx"))
+                return BadRequest("The file format is not supported.");*/
+            /**/
+            string filePath = @"C:\Intel\Metas 2024.xlsx"; // Ruta del archivo
+            string message = "";
+            DataSet dsexcelRecords = new DataSet();            
+
+            FileStream file = File.Open(filePath, FileMode.Open, FileAccess.Read);
+
+
+            try
+            {
+                using (var reader = CreateExcelDataReader(file, file.Name))
+                {
+                    var dataSet = reader.AsDataSet();
+                    reader.Close();
+
+                    if (dataSet == null || dataSet.Tables.Count == 0)
+                        return BadRequest("Selected file is empty.");
+
+                    using (var dbContext = new Models.ModelHealthAdvisor())
+                    {
+                        ProcessDataSet(dataSet, dbContext);
+                    }
+
+                    return Ok("The Excel file has been successfully uploaded.");
+                }
+            }
+            catch (Exception ex)
+            {
+                return InternalServerError(ex);
+            }
+        }
+
+        private IExcelDataReader CreateExcelDataReader(Stream fileStream, string fileName)
+        {
+            if (fileName.EndsWith(".xls"))
+                return ExcelReaderFactory.CreateBinaryReader(fileStream);
+            else
+                return ExcelReaderFactory.CreateOpenXmlReader(fileStream);
+        }
+
+        private void ProcessDataSet(DataSet dataSet, Models.ModelHealthAdvisor dbContext)
+        {
+            var dtCelulares = dataSet.Tables["Celulares"];
+            var dtChips = dataSet.Tables["Chips"];
+            var dtServicio = dataSet.Tables["Servicio"];
+            var dtMicas = dataSet.Tables["Micas"];
+            var rowHeader = dtCelulares.Rows[3];
+            for (int rowIndex = 9; rowIndex <= dtCelulares.Rows.Count - 1; rowIndex++)
+            {
+                var row = dtCelulares.Rows[rowIndex];
+                if (row[0].ToString()=="")
+                {                    
+                    break;
+                }
+                var meta = CreateMetaFromRow(row, dtChips, dtServicio, dtMicas, rowHeader);
+                dbContext.Meta.Add(meta);
+            }
+
+            dbContext.SaveChanges();
+        }
+
+        private Models.Meta CreateMetaFromRow(DataRow row, DataTable dtChips, DataTable dtServicio, DataTable dtMicas, DataRow rowHeader)
+        {
+            var meta = new Models.Meta
+            {
+                LocalId = Convert.ToInt32(row[2].ToString().Split('-')[0]),
+                NumAnio = DateTime.Now.Year
+            };
+
+            meta.MetaDetalle = ExtractMetaDetails(row, dtChips, dtServicio, dtMicas, rowHeader);
+            CalculateTotals(meta);
+
+            return meta;
+        }
+
+        private List<Models.MetaDetalle> ExtractMetaDetails(DataRow row, DataTable dtChips, DataTable dtServicio, DataTable dtMicas, DataRow rowHeader)
+        {
+            var localActual = row[2].ToString();
+            var details = new List<Models.MetaDetalle>();
+            for (int i = 3; i <= 18; i += 3)
+            {
+                if (row[0] != DBNull.Value && rowHeader[i].ToString() != "%")//TODO:
+                {
+                    if (row[i] == DBNull.Value)
+                    {
+
+                    }
+                    var detail = new Models.MetaDetalle
+                    {
+                        Mes = Convert.ToByte(i / 3),
+                        
+                        MetaCe = Convert.ToDecimal((row[i]==DBNull.Value)? 0: row[i] ?? 0),
+                        CumplimientoCe = Convert.ToDecimal((row[i + 1] == DBNull.Value)? 0 : row[i + 1] ?? 0)
+
+
+                    };
+                    IEnumerable<DataRow> dtChipFiltered = dtChips.AsEnumerable()
+                                                  .Where(fila => fila.Field<String>("Column2") == localActual)
+                                                  .OrderByDescending(fila => fila.Field<String>("Column2"));
+
+                    
+                    foreach (var dr in dtChipFiltered)
+                    {
+                        detail.MetaCh = Convert.ToDecimal(dr[i] == DBNull.Value ? "0" : dr[i]);
+                        detail.CumplimientoCh = Convert.ToDecimal(dr[i + 1] == DBNull.Value ? "0" : dr[i + 1]);
+                        
+                    }
+                    IEnumerable<DataRow> dtServicioFiltered = dtServicio.AsEnumerable()
+                      .Where(fila => fila.Field<String>("Column2") == localActual)
+                      .OrderByDescending(fila => fila.Field<String>("Column2"));
+
+                    foreach (var dr in dtServicioFiltered)
+                    {
+                        detail.MetaSe = Math.Round(Convert.ToDecimal(dr[i] == DBNull.Value ? "0" : dr[i]), 2);
+                        detail.CumplimientoSe = Math.Round(Convert.ToDecimal(dr[i + 1] == DBNull.Value ? "0" : dr[i + 1]), 2);
+                        
+                    }
+
+                    //
+                    IEnumerable<DataRow> dtMicaFiltered = dtMicas.AsEnumerable()
+                        .Where(fila => fila.Field<String>("Column2") == localActual)
+                        .OrderByDescending(fila => fila.Field<String>("Column2"));
+
+                    foreach (var dr in dtMicaFiltered)
+                    {
+                        detail.MetaMi = Math.Round(Convert.ToDecimal(dr[i] == DBNull.Value ? "0" : dr[i]), 2);
+                        detail.CumplimientoMi = Math.Round(Convert.ToDecimal(dr[i + 1] == DBNull.Value ? "0" : dr[i + 1]), 2);
+                        
+                    }
+                    
+                    details.Add(detail);
+                }
+            }
+            return details;
+        }
+
+        private void CalculateTotals(Models.Meta meta)
+        {
+            foreach (var detail in meta.MetaDetalle)
+            {
+                meta.MetaTotalCe = Convert.ToDecimal(meta.MetaTotalCe + detail.MetaCe);// += detail.MetaCe;
+                meta.CumplimientoTotalCe = Convert.ToDecimal(meta.CumplimientoTotalCe + detail.CumplimientoCe);//+= detail.CumplimientoCe;
+                // Repeat for other fields
+                meta.MetaTotalCh = Convert.ToDecimal(meta.MetaTotalCh + detail.MetaCh);
+                meta.CumplimientoTotalCh = Convert.ToDecimal(meta.CumplimientoTotalCh + detail.CumplimientoCh);
+
+                meta.MetaTotalSe = Convert.ToDecimal(meta.MetaTotalSe + detail.MetaSe);
+                meta.CumplimientoTotalSe = Convert.ToDecimal(meta.CumplimientoTotalSe + detail.CumplimientoSe);
+
+                meta.MetaTotalMi = Convert.ToDecimal(meta.MetaTotalMi + detail.MetaMi);
+                meta.CumplimientoTotalMi = Convert.ToDecimal(meta.CumplimientoTotalMi + detail.CumplimientoMi);
+            }
+        }
     }
 }

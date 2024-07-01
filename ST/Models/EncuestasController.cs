@@ -6,7 +6,7 @@ using System.Web.Http.Cors;
 
 namespace ST.Models
 {
-    [EnableCors(origins: "http://localhost:4200 , http://ctec.support-royalticgroup.com", headers: "*", methods: "*")]    
+    [EnableCors(origins: "http://localhost:4200 , https://ctec.sydfast.com , http://ctec.sydfast.com", headers: "*", methods: "*")]    
     [RoutePrefix("api/Encuestas")]
     public class EncuestasController : ApiController
     {

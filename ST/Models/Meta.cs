@@ -29,6 +29,11 @@ namespace ST.Models
         public decimal CumplimientoTotalSe { get; set; }
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public decimal PorcentajeTotalSe { get; set; }
+        
+        public decimal MetaTotalMi { get; set; }
+        public decimal CumplimientoTotalMi { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public decimal PorcentajeTotalMi { get; set; }
         public virtual ICollection<MetaDetalle> MetaDetalle { get; set; }
     }
 }

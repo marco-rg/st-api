@@ -6,7 +6,7 @@ using System.Web.Http.Cors;
 namespace ST.Controllers
 {
     //[Authorize]
-    [EnableCors(origins: "http://localhost:4200 , http://ctec.support-royalticgroup.com", headers: "*", methods: "*")]
+    [EnableCors(origins: "http://localhost:4200 , https://ctec.sydfast.com , http://ctec.sydfast.com", headers: "*", methods: "*")]
     [RoutePrefix("api/Pregunta")]
     public class PreguntaController : ApiController
     {

@@ -25,6 +25,10 @@ namespace ST.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public decimal? PorcentajeSe { get; set; }
 
+        public decimal? MetaMi { get; set; }
+        public decimal? CumplimientoMi { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public decimal? PorcentajeMi { get; set; }
         public virtual Meta Meta { get; set; }
     }
 }
